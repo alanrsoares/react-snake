@@ -22,15 +22,17 @@ type Block = Position & {
 interface Props {}
 
 interface State {
+  animationFrameId: number;
   snake: Block[];
   turns: { [index: string]: Direction };
-  isMoving: boolean;
   fruit: Position & { value: string };
+  isMoving: boolean;
+  isGameOver: boolean;
 }
 
 const BOARD_SIZE = 450;
 const PIXEL_SIZE = 10;
-const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 1;
+const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
 
 const OPPOSITE_DIRECTION: { [direction: string]: Direction } = {
@@ -40,21 +42,26 @@ const OPPOSITE_DIRECTION: { [direction: string]: Direction } = {
   down: "up"
 };
 
-const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍑", "🍒", "🍓", "🥝"];
+const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍑", "🍓", "🥝"];
+
+const areSamePosition = (a: Position) => (b: Position) =>
+  a.x === b.x && a.y === b.y;
 
 class App extends React.Component<Props, State> {
   state: State = {
+    animationFrameId: 0,
     snake: [
       { x: 5, y: 0, direction: "right" },
       { x: 4, y: 0, direction: "right" }
     ],
     turns: {},
-    isMoving: false,
     fruit: {
       value: FRUITS[randomInt(0, FRUITS.length - 1)],
       y: randomInt(0, PIXELS),
       x: randomInt(0, PIXELS)
-    }
+    },
+    isMoving: false,
+    isGameOver: false
   };
 
   get ctx() {
@@ -69,7 +76,7 @@ class App extends React.Component<Props, State> {
 
   componentWillUnMount() {
     document.removeEventListener("keyup", this.handleKeyUp);
-    this.setState({ isMoving: false });
+    window.cancelAnimationFrame(this.state.animationFrameId);
   }
 
   componentDidMount() {
@@ -88,20 +95,10 @@ class App extends React.Component<Props, State> {
     }));
   }
 
-  spawnFruit() {
-    this.setState({
-      fruit: {
-        value: FRUITS[randomInt(0, FRUITS.length - 1)],
-        y: randomInt(0, PIXELS),
-        x: randomInt(0, PIXELS)
-      }
-    });
-  }
-
   handleKeyUp = ({ code }: KeyboardEvent) => {
     const prefix = "Arrow";
-    const moveDirection = code.startsWith(prefix)
-      ? code.replace(prefix, "").toLowerCase()
+    const moveDirection: Direction | null = code.startsWith(prefix)
+      ? (code.replace(prefix, "").toLowerCase() as Direction)
       : null;
 
     if (moveDirection) {
@@ -124,10 +121,11 @@ class App extends React.Component<Props, State> {
   draw = () => {
     this.clear();
 
-    this.ctx.strokeText(
+    this.ctx.font = `${PIXEL_SIZE * 1.8}px Segoe UI Emoji`;
+    this.ctx.fillText(
       this.state.fruit.value,
-      this.state.fruit.x * PIXEL_SIZE - 1,
-      this.state.fruit.y * PIXEL_SIZE + 9
+      this.state.fruit.x * PIXEL_SIZE - 6,
+      this.state.fruit.y * PIXEL_SIZE + 12
     );
 
     this.state.snake.forEach((p: Block, i: number) => {
@@ -139,11 +137,13 @@ class App extends React.Component<Props, State> {
   clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
   play = () => {
-    window.requestAnimationFrame(() => {
-      if (this.state.isMoving) {
-        this.move();
-      }
-      delay(SPEED)(this.play);
+    this.state.animationFrameId = window.requestAnimationFrame(() => {
+      delay(SPEED)(() => {
+        if (this.state.isMoving && !this.state.isGameOver) {
+          this.move();
+        }
+        this.play();
+      });
     });
   };
 
@@ -187,6 +187,8 @@ class App extends React.Component<Props, State> {
     this.setState(state => {
       let turns = state.turns;
       let fruit = state.fruit;
+      let isMoving = state.isMoving;
+      let isGameOver = state.isGameOver;
 
       let hasEaten = false;
 
@@ -197,13 +199,19 @@ class App extends React.Component<Props, State> {
           delete turns[`${p.y}_${p.x}`];
         }
 
-        if (!i && p.y === fruit.y && p.x === fruit.x) {
-          hasEaten = true;
-          fruit = {
-            value: FRUITS[randomInt(0, FRUITS.length - 1)],
-            y: randomInt(0, PIXELS),
-            x: randomInt(0, PIXELS)
-          };
+        if (!i) {
+          if (areSamePosition(p)(fruit)) {
+            hasEaten = true;
+            fruit = {
+              value: FRUITS[randomInt(0, FRUITS.length - 1)],
+              y: randomInt(0, PIXELS),
+              x: randomInt(0, PIXELS)
+            };
+          }
+          if (xs.slice(1).some(areSamePosition(p))) {
+            isMoving = false;
+            isGameOver = true;
+          }
         }
 
         const direction = turn || p.direction;
@@ -217,7 +225,7 @@ class App extends React.Component<Props, State> {
         snake.push(this.moveBlock(OPPOSITE_DIRECTION[last.direction], last));
       }
 
-      return { snake, turns, fruit };
+      return { snake, turns, fruit, isMoving, isGameOver };
     }, this.draw);
   };
 
@@ -230,7 +238,13 @@ class App extends React.Component<Props, State> {
           height: BOARD_SIZE
         }}
       >
-        <div className="canvas-overlay" />
+        {this.state.isGameOver && (
+          <div>
+            <div className="canvas-overlay" />
+            <div className="overlay-message">GAME OVER</div>
+          </div>
+        )}
+
         <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
       </div>
     );
