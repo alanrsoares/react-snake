@@ -1,0 +1,13 @@
+body {
+  background: #fdfffc;
+}
+
+.canvas-container {
+  border: solid 2px #bababa;
+  padding: 2px;
+  margin: 10% auto;
+}
+
+#canvas {
+  background: #2ec4b6;
+}

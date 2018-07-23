@@ -1,0 +1,20 @@
+{
+  "name": "react-snake",
+  "version": "1.0.0",
+  "description": "snake game in react",
+  "keywords": [],
+  "main": "src/index.tsx",
+  "dependencies": {
+    "react-dom": "16.0.0",
+    "react": "16.0.0",
+    "@types/react-dom": "15.5.4",
+    "@types/react": "16.0.7",
+    "react-scripts-ts": "^2.13.0"
+  },
+  "scripts": {
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
+  }
+}
