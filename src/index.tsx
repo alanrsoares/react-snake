@@ -98,30 +98,18 @@ class App extends React.Component<Props, State> {
     });
   }
 
-  handleKeyUp = (e: KeyboardEvent) => {
-    const { direction } = this.state.snake[0];
+  handleKeyUp = ({ code }: KeyboardEvent) => {
+    const prefix = "Arrow";
+    const moveDirection = code.startsWith(prefix)
+      ? code.replace(prefix, "").toLowerCase()
+      : null;
 
-    switch (e.code) {
-      case "ArrowUp":
-        if (direction !== "down") {
-          this.setDirection("up");
-        }
-        break;
-      case "ArrowDown":
-        if (direction !== "up") {
-          this.setDirection("down");
-        }
-        break;
-      case "ArrowLeft":
-        if (direction !== "right") {
-          this.setDirection("left");
-        }
-        break;
-      case "ArrowRight":
-        if (direction !== "left") {
-          this.setDirection("right");
-        }
-        break;
+    if (moveDirection) {
+      const { direction } = this.state.snake[0];
+
+      if (direction !== OPPOSITE_DIRECTION[moveDirection]) {
+        this.setDirection(moveDirection);
+      }
     }
   };
 
@@ -168,6 +156,7 @@ class App extends React.Component<Props, State> {
       }
       return x * 10 >= BOARD_SIZE ? 0 : x;
     };
+
     switch (direction) {
       case "right":
         return {
