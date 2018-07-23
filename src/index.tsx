@@ -104,7 +104,10 @@ class App extends React.Component<Props, State> {
     if (moveDirection) {
       const { direction } = this.state.snake[0];
 
-      if (direction !== OPPOSITE_DIRECTION[moveDirection]) {
+      if (
+        direction !== moveDirection &&
+        direction !== OPPOSITE_DIRECTION[moveDirection]
+      ) {
         this.setDirection(moveDirection);
       }
     }
