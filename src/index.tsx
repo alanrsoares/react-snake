@@ -8,6 +8,9 @@ const delay = (time: number) => (fn: Function) => window.setTimeout(fn, time);
 const randomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
+const areSamePosition = (a: Position) => (b: Position) =>
+  a.x === b.x && a.y === b.y;
+
 type Position = {
   x: number;
   y: number;
@@ -30,7 +33,7 @@ interface State {
   isGameOver: boolean;
 }
 
-const BOARD_SIZE = 450;
+const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
@@ -44,25 +47,24 @@ const OPPOSITE_DIRECTION: { [direction: string]: Direction } = {
 
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍑", "🍓", "🥝"];
 
-const areSamePosition = (a: Position) => (b: Position) =>
-  a.x === b.x && a.y === b.y;
+const INITIAL_STATE: State = {
+  animationFrameId: 0,
+  snake: [
+    { x: 5, y: 0, direction: "right" },
+    { x: 4, y: 0, direction: "right" }
+  ],
+  turns: {},
+  fruit: {
+    value: FRUITS[randomInt(0, FRUITS.length - 1)],
+    y: randomInt(0, PIXELS),
+    x: randomInt(0, PIXELS)
+  },
+  isMoving: false,
+  isGameOver: false
+};
 
 class App extends React.Component<Props, State> {
-  state: State = {
-    animationFrameId: 0,
-    snake: [
-      { x: 5, y: 0, direction: "right" },
-      { x: 4, y: 0, direction: "right" }
-    ],
-    turns: {},
-    fruit: {
-      value: FRUITS[randomInt(0, FRUITS.length - 1)],
-      y: randomInt(0, PIXELS),
-      x: randomInt(0, PIXELS)
-    },
-    isMoving: false,
-    isGameOver: false
-  };
+  state: State = INITIAL_STATE;
 
   get ctx() {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -84,15 +86,22 @@ class App extends React.Component<Props, State> {
     this.play();
   }
 
-  setDirection(direction: Direction) {
-    this.setState(({ turns, snake: [head, ...rest] }) => ({
-      turns: {
-        ...turns,
-        [`${head.y}_${head.x}`]: direction
-      },
-      snake: [{ ...head, direction }, ...rest],
-      isMoving: true
-    }));
+  setDirection(moveDirection: Direction) {
+    const { direction } = this.state.snake[0];
+
+    if (
+      direction !== moveDirection &&
+      direction !== OPPOSITE_DIRECTION[moveDirection]
+    ) {
+      this.setState(({ turns, snake: [head, ...rest] }) => ({
+        turns: {
+          ...turns,
+          [`${head.y}_${head.x}`]: moveDirection
+        },
+        snake: [{ ...head, direction: moveDirection }, ...rest],
+        isMoving: true
+      }));
+    }
   }
 
   handleKeyUp = ({ code }: KeyboardEvent) => {
@@ -102,14 +111,7 @@ class App extends React.Component<Props, State> {
       : null;
 
     if (moveDirection) {
-      const { direction } = this.state.snake[0];
-
-      if (
-        direction !== moveDirection &&
-        direction !== OPPOSITE_DIRECTION[moveDirection]
-      ) {
-        this.setDirection(moveDirection);
-      }
+      this.setDirection(moveDirection);
     }
   };
 
@@ -148,6 +150,11 @@ class App extends React.Component<Props, State> {
         this.play();
       });
     });
+  };
+
+  reset = () => {
+    window.cancelAnimationFrame(this.state.animationFrameId);
+    this.setState(INITIAL_STATE, this.draw);
   };
 
   getTurn = (b: Block, state: State) => state.turns[`${b.y}_${b.x}`];
@@ -244,7 +251,14 @@ class App extends React.Component<Props, State> {
         {this.state.isGameOver && (
           <div>
             <div className="canvas-overlay" />
-            <div className="overlay-message">GAME OVER</div>
+            <div className="overlay-message">
+              <div>GAME OVER</div>
+              <div>
+                <button className="overlay-button" onClick={this.reset}>
+                  NEW GAME
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -253,15 +267,31 @@ class App extends React.Component<Props, State> {
         <div className="controls">
           <div className="directional-container">
             <button className="control up">
-              <div className="control-text">↑</div>
+              <div
+                className="control-text"
+                onClick={() => this.setDirection("up")}
+              >
+                ↑
+              </div>
             </button>
-            <button className="control right">
+            <button
+              className="control right"
+              onClick={() => this.setDirection("right")}
+            >
               <div className="control-text">→</div>
             </button>
             <button className="control left">
-              <div className="control-text">←</div>
+              <div
+                className="control-text"
+                onClick={() => this.setDirection("left")}
+              >
+                ←
+              </div>
             </button>
-            <button className="control down">
+            <button
+              className="control down"
+              onClick={() => this.setDirection("down")}
+            >
               <div className="control-text">↓</div>
             </button>
           </div>

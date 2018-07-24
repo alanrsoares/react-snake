@@ -10,7 +10,7 @@ body {
   position: relative;
   border: solid 2px #bababa;
   padding: 2px;
-  margin: 10% auto;
+  margin: 20px auto;
   justify-content: center;
 }
 
@@ -27,6 +27,7 @@ body {
 
 .overlay-message {
   display: flex;
+  flex-direction: column;
   position: absolute;
   width: 100%;
   height: 100%;
@@ -35,6 +36,22 @@ body {
   opacity: 1;
   color: tomato;
   font-size: 40px;
+}
+
+.overlay-button {
+  border: solid 2px #2ec4b6;
+  color: #2ec4b6;
+  background: #fdfffc;
+  padding: 5px 10px;
+  margin-top: 20px;
+  border-radius: 4px;
+  font-size: 20px;
+  cursor: pointer;
+  outline: none;
+}
+
+.overlay-button:active {
+  transform: translateY(2px);
 }
 
 #canvas {
