@@ -249,6 +249,23 @@ class App extends React.Component<Props, State> {
         )}
 
         <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
+
+        <div className="controls">
+          <div className="directional-container">
+            <button className="control up">
+              <div className="control-text">↑</div>
+            </button>
+            <button className="control right">
+              <div className="control-text">→</div>
+            </button>
+            <button className="control left">
+              <div className="control-text">←</div>
+            </button>
+            <button className="control down">
+              <div className="control-text">↓</div>
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
