@@ -1,13 +1,140 @@
+* {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 body {
   background: #fdfffc;
 }
 
 .canvas-container {
+  position: relative;
   border: solid 2px #bababa;
   padding: 2px;
-  margin: 10% auto;
+  margin: 20px auto;
+  justify-content: center;
+}
+
+.canvas-overlay {
+  display: flex;
+  position: absolute;
+  background: #ccc;
+  opacity: 0.8;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay-message {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  color: tomato;
+  font-size: 40px;
+}
+
+.overlay-button {
+  border: solid 2px #2ec4b6;
+  color: #2ec4b6;
+  background: #fdfffc;
+  padding: 5px 10px;
+  margin-top: 20px;
+  border-radius: 4px;
+  font-size: 20px;
+  cursor: pointer;
+  outline: none;
+}
+
+.overlay-button:active {
+  transform: translateY(2px);
 }
 
 #canvas {
   background: #2ec4b6;
+}
+
+.controls {
+  display: flex;
+  margin: 10px auto;
+  padding: 2px;
+  justify-content: flex-end;
+}
+
+.directional-container {
+  background: #ccc;
+  border: solid 4px #ccc;
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+  padding: 8px;
+  transform: rotate(45deg);
+}
+
+.control {
+  font-size: 18px;
+  border: solid 0.5px#ccc;
+  width: 100px;
+  height: 100px;
+  background: #dedede;
+  outline: none;
+  cursor: pointer;
+}
+
+.control:hover {
+  background: #bbb;
+}
+
+.control-text {
+  font-size: 60px;
+  color: white;
+  transform: rotate(-45deg);
+}
+
+.up {
+  border-top: solid 4px #ccc;
+  border-left: solid 4px #ccc;
+
+  border-top-left-radius: 50%;
+}
+
+.up:active {
+  transform: translateX(-2px) translateY(-2px);
+}
+
+.right {
+  border-top: solid 4px #ccc;
+  border-right: solid 4px #ccc;
+
+  border-top-right-radius: 50%;
+}
+
+.right:active {
+  transform: translateX(2px) translateY(-2px);
+}
+
+.down {
+  border-bottom: solid 4px #ccc;
+  border-right: solid 4px #ccc;
+
+  border-bottom-right-radius: 50%;
+}
+
+.down:active {
+  transform: translateX(2px) translateY(2px);
+}
+
+.left {
+  border-bottom: solid 4px #ccc;
+  border-left: solid 4px #ccc;
+
+  border-bottom-left-radius: 50%;
+}
+
+.left:active {
+  transform: translateX(-2px) translateY(2px);
 }
