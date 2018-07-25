@@ -2,7 +2,7 @@
   "name": "react-snake",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://alanrsoartes.github.io/react-snake",
+  "homepage": "http://alanrsoares.github.io/react-snake",
   "scripts": {
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
