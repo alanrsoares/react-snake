@@ -116,7 +116,7 @@ export default class App extends React.Component<{}, IState> {
           <div>
             <div className="canvas-overlay" />
             <div className="overlay-message">
-              {this.state.isGameOver && <div>GAME OVER</div>}
+              <div>{this.state.isGameOver ? "GAME OVER" : "🐍"}</div>
               <div>
                 {this.state.isGameOver ? (
                   <button className="overlay-button" onClick={this.reset}>
@@ -233,6 +233,8 @@ export default class App extends React.Component<{}, IState> {
       let hasEaten = false;
 
       const snake = state.snake.map((p, i, xs) => {
+        const turn = getTurn(p, state.turns);
+
         if (i === xs.length - 1) {
           delete turns[`${p.y}_${p.x}`];
         }
@@ -249,7 +251,7 @@ export default class App extends React.Component<{}, IState> {
           }
         }
 
-        const direction = getTurn(p, state.turns) || p.direction;
+        const direction = turn || p.direction;
         const block = { ...p, direction };
 
         return moveBlock(direction, block);
