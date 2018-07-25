@@ -120,7 +120,11 @@ export default class App extends React.Component<{}, IState> {
               <div className="canvas-overlay" />
               <div className="overlay-message">
                 {!this.state.isGameOver && (
-                  <img src="mstile-150x150.png" className="snake-img" />
+                  <img
+                    src="mstile-150x150.png"
+                    alt="snake logo"
+                    className="snake-img"
+                  />
                 )}
                 <div>{this.state.isGameOver ? "GAME OVER" : "REACT SNAKE"}</div>
                 <div>
