@@ -91,10 +91,6 @@ export default class App extends React.Component<{}, IState> {
     return canvas.getContext("2d") as CanvasRenderingContext2D;
   }
 
-  get shouldRenderOverlay() {
-    return this.state.isGameOver || !this.state.isPlaying;
-  }
-
   public componentWillMount() {
     document.addEventListener("keyup", this.handleKeyUp);
   }
@@ -115,52 +111,65 @@ export default class App extends React.Component<{}, IState> {
           className="canvas-container"
           style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
         >
-          {this.shouldRenderOverlay && (
-            <div>
-              <div className="canvas-overlay" />
-              <div className="overlay-message">
-                {!this.state.isGameOver && (
-                  <img
-                    src="mstile-150x150.png"
-                    alt="snake logo"
-                    className="snake-img"
-                  />
-                )}
-                <div>{this.state.isGameOver ? "GAME OVER" : "REACT SNAKE"}</div>
-                <div>
-                  {this.state.isGameOver ? (
-                    <button className="overlay-button" onClick={this.reset}>
-                      NEW GAME
-                    </button>
-                  ) : (
-                    <button className="overlay-button" onClick={this.start}>
-                      START
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          {this.renderOverlay()}
 
           <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
-
           <div className="under-canvas">REACT SNAKE 1998</div>
 
-          <div className="controls">
-            <div className="score">{this.state.score}</div>
-            <div className="directional-container">
-              {Object.keys(OPPOSITE_DIRECTION).map((d: Direction) => (
-                <button
-                  key={d}
-                  className={`control ${d}`}
-                  disabled={!this.state.isPlaying}
-                  onClick={this.handleJoyStickClick(d)}
-                >
-                  <div className="control-text">↑</div>
-                </button>
-              ))}
-            </div>
+          {this.renderControls()}
+        </div>
+      </div>
+    );
+  }
+
+  private renderOverlay() {
+    if (!this.state.isGameOver && this.state.isPlaying) {
+      return null;
+    }
+
+    return (
+      <div>
+        <div className="canvas-overlay" />
+        <div className="overlay-message">
+          {!this.state.isGameOver && (
+            <img
+              src="mstile-150x150.png"
+              alt="snake logo"
+              className="snake-img"
+            />
+          )}
+          <div>{this.state.isGameOver ? "GAME OVER" : "REACT SNAKE"}</div>
+          <div>
+            {this.state.isGameOver ? (
+              <button className="overlay-button" onClick={this.reset}>
+                NEW GAME
+              </button>
+            ) : (
+              <button className="overlay-button" onClick={this.start}>
+                START
+              </button>
+            )}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderControls() {
+    return (
+      <div className="controls">
+        <div className="score">{this.state.score}</div>
+        <div className="directional-container">
+          {Object.keys(OPPOSITE_DIRECTION).map((d: Direction) => (
+            <button
+              key={d}
+              className={`control ${d}`}
+              disabled={!this.state.isPlaying}
+              onClick={this.handleJoyStickClick(d)}
+            >
+              <div className="control-text">↑</div>
+            </button>
+          ))}
         </div>
       </div>
     );
