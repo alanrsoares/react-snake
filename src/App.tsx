@@ -12,19 +12,19 @@ const areSamePosition = (a: IPosition) => (b: IPosition) =>
 
 const getTurn = (b: Block, state: IState) => state.turns[`${b.y}_${b.x}`];
 
-function moveBlock(direction: Direction, block: Block) {
-  const safe = (x: number) => {
-    if (x < 0) {
-      return BOARD_SIZE / PIXEL_SIZE - 1;
-    }
-    return x * 10 >= BOARD_SIZE ? 0 : x;
-  };
+function safeIndex(x: number) {
+  if (x < 0) {
+    return BOARD_SIZE / PIXEL_SIZE - 1;
+  }
+  return x * 10 >= BOARD_SIZE ? 0 : x;
+}
 
+function moveBlock(direction: Direction, block: Block) {
   const patches = {
-    up: { y: safe(block.y - 1) },
-    right: { x: safe(block.x + 1) },
-    left: { x: safe(block.x - 1) },
-    down: { y: safe(block.y + 1) }
+    up: { y: safeIndex(block.y - 1) },
+    right: { x: safeIndex(block.x + 1) },
+    left: { x: safeIndex(block.x - 1) },
+    down: { y: safeIndex(block.y + 1) }
   };
 
   return { ...block, ...patches[direction] };
