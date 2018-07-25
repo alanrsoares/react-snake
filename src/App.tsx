@@ -137,6 +137,8 @@ export default class App extends React.Component<{}, IState> {
 
           <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
 
+          <div className="under-canvas">REACT SNAKE 1998</div>
+
           <div className="controls">
             <div className="score">{this.state.score}</div>
             <div className="directional-container">

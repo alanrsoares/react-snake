@@ -16,9 +16,7 @@
 
 .canvas-container {
   position: relative;
-  border: solid 2px #bababa;
-  border-radius: 4px;
-  padding: 2px;
+  border: solid 4px #bababa;
   margin: 20px auto;
   justify-content: center;
 }
@@ -67,6 +65,13 @@
   background: #2ec4b6;
 }
 
+.under-canvas {
+  text-align: center;
+  color: white;
+  background: #bababa;
+  padding: 2px;
+}
+
 .controls {
   display: flex;
   margin: 10px auto;
@@ -87,7 +92,7 @@
 
 .control {
   font-size: 18px;
-  border: solid 2px #ccc;
+  border: solid 3px #ccc;
   width: 80px;
   height: 80px;
   background: #dedede;
@@ -148,6 +153,9 @@
 }
 
 .score {
+  position: relative;
+  top: -60px;
+  left: -13px;
   background: #accac7;
   color: white;
   text-align: right;
