@@ -233,8 +233,6 @@ export default class App extends React.Component<{}, IState> {
       let hasEaten = false;
 
       const snake = state.snake.map((p, i, xs) => {
-        const turn = getTurn(p, state.turns);
-
         if (i === xs.length - 1) {
           delete turns[`${p.y}_${p.x}`];
         }
@@ -251,7 +249,7 @@ export default class App extends React.Component<{}, IState> {
           }
         }
 
-        const direction = turn || p.direction;
+        const direction = getTurn(p, state.turns) || p.direction;
         const block = { ...p, direction };
 
         return moveBlock(direction, block);
