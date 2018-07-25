@@ -4,6 +4,9 @@
 
 body {
   background: #fdfffc;
+  max-height: 100vh;
+  overscroll-behavior: none;
+  overflow: hidden;
 }
 
 .canvas-container {
@@ -69,20 +72,20 @@ body {
   background: #ccc;
   border: solid 4px #ccc;
   border-radius: 50%;
-  width: 200px;
-  height: 200px;
+  width: 160px;
+  height: 160px;
   padding: 8px;
   transform: rotate(45deg);
+  outline: none;
 }
 
 .control {
   font-size: 18px;
-  border: solid 0.5px#ccc;
-  width: 100px;
-  height: 100px;
+  border: solid 2px #ccc;
+  width: 80px;
+  height: 80px;
   background: #dedede;
   outline: none;
-  cursor: pointer;
 }
 
 .control:hover {
@@ -90,8 +93,7 @@ body {
 }
 
 .control-text {
-  font-size: 60px;
-  color: white;
+  color: transparent;
   transform: rotate(-45deg);
 }
 
@@ -103,7 +105,7 @@ body {
 }
 
 .up:active {
-  transform: translateX(-2px) translateY(-2px);
+  transform: translateX(-1px) translateY(-1px);
 }
 
 .right {
@@ -114,7 +116,7 @@ body {
 }
 
 .right:active {
-  transform: translateX(2px) translateY(-2px);
+  transform: translateX(1px) translateY(-1px);
 }
 
 .down {
@@ -125,7 +127,7 @@ body {
 }
 
 .down:active {
-  transform: translateX(2px) translateY(2px);
+  transform: translateX(1px) translateY(1px);
 }
 
 .left {
@@ -136,5 +138,5 @@ body {
 }
 
 .left:active {
-  transform: translateX(-2px) translateY(2px);
+  transform: translateX(-1px) translateY(1px);
 }
