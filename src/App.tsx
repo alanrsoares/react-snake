@@ -119,7 +119,10 @@ export default class App extends React.Component<{}, IState> {
             <div>
               <div className="canvas-overlay" />
               <div className="overlay-message">
-                <div>{this.state.isGameOver ? "GAME OVER" : "🐍"}</div>
+                {!this.state.isGameOver && (
+                  <img src="mstile-150x150.png" className="snake-img" />
+                )}
+                <div>{this.state.isGameOver ? "GAME OVER" : "REACT SNAKE"}</div>
                 <div>
                   {this.state.isGameOver ? (
                     <button className="overlay-button" onClick={this.reset}>
