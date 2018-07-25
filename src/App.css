@@ -7,9 +7,17 @@
   border-bottom-left-radius: 7.5% 5%;
 }
 
+@media screen and (max-width: 360px) {
+  .game {
+    border: none;
+    width: 100%;
+  }
+}
+
 .canvas-container {
   position: relative;
   border: solid 2px #bababa;
+  border-radius: 4px;
   padding: 2px;
   margin: 20px auto;
   justify-content: center;
@@ -137,4 +145,15 @@
 
 .left:active {
   transform: translateX(-1px) translateY(1px);
+}
+
+.score {
+  background: #accac7;
+  color: white;
+  text-align: right;
+  font-size: 30px;
+  padding: 15px 10px;
+  width: 100px;
+  height: 30px;
+  margin: auto;
 }

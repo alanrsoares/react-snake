@@ -55,6 +55,7 @@ interface IState {
   fruit: IPosition & { value: string };
   isPlaying: boolean;
   isGameOver: boolean;
+  score: number;
 }
 
 const BOARD_SIZE = 330;
@@ -77,7 +78,8 @@ const INITIAL_STATE: IState = {
   turns: {},
   fruit: randomFruit(),
   isPlaying: false,
-  isGameOver: false
+  isGameOver: false,
+  score: 0
 };
 
 export default class App extends React.Component<{}, IState> {
@@ -136,6 +138,7 @@ export default class App extends React.Component<{}, IState> {
           <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
 
           <div className="controls">
+            <div className="score">{this.state.score}</div>
             <div className="directional-container">
               {Object.keys(OPPOSITE_DIRECTION).map((d: Direction) => (
                 <button
@@ -231,6 +234,7 @@ export default class App extends React.Component<{}, IState> {
       let fruit = state.fruit;
       let isPlaying = state.isPlaying;
       let isGameOver = state.isGameOver;
+      let score = state.score;
 
       let hasEaten = false;
 
@@ -244,6 +248,7 @@ export default class App extends React.Component<{}, IState> {
         if (!i /* is head */) {
           if (areSamePosition(p)(fruit)) {
             hasEaten = true;
+            score++;
             fruit = randomFruit();
           }
           if (xs.slice(1).some(areSamePosition(p))) {
@@ -264,7 +269,7 @@ export default class App extends React.Component<{}, IState> {
         snake.push(moveBlock(OPPOSITE_DIRECTION[last.direction], last));
       }
 
-      return { snake, turns, fruit, isPlaying, isGameOver };
+      return { snake, turns, fruit, isPlaying, isGameOver, score };
     }, this.draw);
   };
 }
