@@ -117,7 +117,7 @@
 }
 
 .up:active {
-  transform: translateX(-1px) translateY(-1px);
+  transform: translate(-2px, -2px);
 }
 
 .right {
@@ -128,7 +128,7 @@
 }
 
 .right:active {
-  transform: translateX(1px) translateY(-1px);
+  transform: translate(2px, -2px);
 }
 
 .down {
@@ -139,7 +139,7 @@
 }
 
 .down:active {
-  transform: translateX(1px) translateY(1px);
+  transform: translate(2px, 2px);
 }
 
 .left {
@@ -150,7 +150,7 @@
 }
 
 .left:active {
-  transform: translateX(-1px) translateY(1px);
+  transform: translate(-2px, 2px);
 }
 
 .score {
