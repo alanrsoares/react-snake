@@ -108,44 +108,46 @@ export default class App extends React.Component<{}, IState> {
 
   public render() {
     return (
-      <div
-        className="canvas-container"
-        style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
-      >
-        {this.shouldRenderOverlay && (
-          <div>
-            <div className="canvas-overlay" />
-            <div className="overlay-message">
-              <div>{this.state.isGameOver ? "GAME OVER" : "🐍"}</div>
-              <div>
-                {this.state.isGameOver ? (
-                  <button className="overlay-button" onClick={this.reset}>
-                    NEW GAME
-                  </button>
-                ) : (
-                  <button className="overlay-button" onClick={this.start}>
-                    START
-                  </button>
-                )}
+      <div className="game">
+        <div
+          className="canvas-container"
+          style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
+        >
+          {this.shouldRenderOverlay && (
+            <div>
+              <div className="canvas-overlay" />
+              <div className="overlay-message">
+                <div>{this.state.isGameOver ? "GAME OVER" : "🐍"}</div>
+                <div>
+                  {this.state.isGameOver ? (
+                    <button className="overlay-button" onClick={this.reset}>
+                      NEW GAME
+                    </button>
+                  ) : (
+                    <button className="overlay-button" onClick={this.start}>
+                      START
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
+          <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
 
-        <div className="controls">
-          <div className="directional-container">
-            {Object.keys(OPPOSITE_DIRECTION).map((d: Direction) => (
-              <button
-                key={d}
-                className={`control ${d}`}
-                disabled={!this.state.isPlaying}
-                onClick={this.handleJoyStickClick(d)}
-              >
-                <div className="control-text">↑</div>
-              </button>
-            ))}
+          <div className="controls">
+            <div className="directional-container">
+              {Object.keys(OPPOSITE_DIRECTION).map((d: Direction) => (
+                <button
+                  key={d}
+                  className={`control ${d}`}
+                  disabled={!this.state.isPlaying}
+                  onClick={this.handleJoyStickClick(d)}
+                >
+                  <div className="control-text">↑</div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
