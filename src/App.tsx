@@ -2,15 +2,12 @@ import * as React from "react";
 
 import "./App.css";
 
-const delay = (time: number) => (fn: () => void) => window.setTimeout(fn, time);
-
-const randomInt = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
+import * as utils from "./utils";
 
 const areSamePosition = (a: IPosition) => (b: IPosition) =>
   a.x === b.x && a.y === b.y;
 
-const getTurn = (b: Block, state: IState) => state.turns[`${b.y}_${b.x}`];
+const getTurn = (b: Block, turns: ITurns) => turns[`${b.y}_${b.x}`];
 
 function safeIndex(x: number) {
   if (x < 0) {
@@ -30,9 +27,19 @@ function moveBlock(direction: Direction, block: Block) {
   return { ...block, ...patches[direction] };
 }
 
+const randomFruit = () => ({
+  value: FRUITS[utils.randomInt(0, FRUITS.length - 1)],
+  y: utils.randomInt(0, PIXELS),
+  x: utils.randomInt(0, PIXELS)
+});
+
 interface IPosition {
   x: number;
   y: number;
+}
+
+interface ITurns {
+  [index: string]: Direction;
 }
 
 type Direction = "up" | "down" | "left" | "right";
@@ -44,7 +51,7 @@ type Block = IPosition & {
 interface IState {
   animationFrameId: number;
   snake: Block[];
-  turns: { [index: string]: Direction };
+  turns: ITurns;
   fruit: IPosition & { value: string };
   isPlaying: boolean;
   isGameOver: boolean;
@@ -68,11 +75,7 @@ const INITIAL_STATE: IState = {
   animationFrameId: 0,
   snake: [{ x: 5, y: 0, direction: "right" }],
   turns: {},
-  fruit: {
-    value: FRUITS[randomInt(0, FRUITS.length - 1)],
-    y: randomInt(0, PIXELS),
-    x: randomInt(0, PIXELS)
-  },
+  fruit: randomFruit(),
   isPlaying: false,
   isGameOver: false
 };
@@ -208,7 +211,7 @@ export default class App extends React.Component<{}, IState> {
   private clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
   private play = () =>
-    delay(SPEED)(() => {
+    utils.delay(SPEED)(() => {
       if (this.state.isPlaying && !this.state.isGameOver) {
         this.move();
         this.state.animationFrameId = window.requestAnimationFrame(this.play);
@@ -230,20 +233,16 @@ export default class App extends React.Component<{}, IState> {
       let hasEaten = false;
 
       const snake = state.snake.map((p, i, xs) => {
-        const turn = getTurn(p, state);
+        const turn = getTurn(p, state.turns);
 
         if (i === xs.length - 1) {
           delete turns[`${p.y}_${p.x}`];
         }
 
-        if (!i) {
+        if (!i /* is head */) {
           if (areSamePosition(p)(fruit)) {
             hasEaten = true;
-            fruit = {
-              value: FRUITS[randomInt(0, FRUITS.length - 1)],
-              y: randomInt(0, PIXELS),
-              x: randomInt(0, PIXELS)
-            };
+            fruit = randomFruit();
           }
           if (xs.slice(1).some(areSamePosition(p))) {
             isPlaying = false;
