@@ -110,16 +110,13 @@ class App extends React.Component<Props, State> {
     const { direction } = this.state.snake[0];
 
     if (direction !== move && direction !== OPPOSITE_DIRECTION[move]) {
-      this.setState(
-        ({ turns, snake: [head, ...rest] }) => ({
-          turns: {
-            ...turns,
-            [`${head.y}_${head.x}`]: move
-          },
-          snake: [{ ...head, direction: move }, ...rest]
-        }),
-        this.draw
-      );
+      this.setState(({ turns, snake: [head, ...rest] }) => ({
+        turns: {
+          ...turns,
+          [`${head.y}_${head.x}`]: move
+        },
+        snake: [{ ...head, direction: move }, ...rest]
+      }));
     }
   }
 
@@ -227,7 +224,7 @@ class App extends React.Component<Props, State> {
         snake.push(moveBlock(OPPOSITE_DIRECTION[last.direction], last));
       }
 
-      return { ...this.state, snake, turns, fruit, isPlaying, isGameOver };
+      return { snake, turns, fruit, isPlaying, isGameOver };
     }, this.draw);
   };
 
