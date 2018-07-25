@@ -21,30 +21,14 @@ function moveBlock(direction: Direction, block: Block) {
     return x * 10 >= BOARD_SIZE ? 0 : x;
   };
 
-  switch (direction) {
-    case "right":
-      return {
-        ...block,
-        x: safe(block.x + 1)
-      };
-    case "left":
-      return {
-        ...block,
-        x: safe(block.x - 1)
-      };
-    case "down":
-      return {
-        ...block,
-        y: safe(block.y + 1)
-      };
-    case "up":
-      return {
-        ...block,
-        y: safe(block.y - 1)
-      };
-    default:
-      return block;
-  }
+  const patches = {
+    up: { y: safe(block.y - 1) },
+    right: { x: safe(block.x + 1) },
+    left: { x: safe(block.x - 1) },
+    down: { y: safe(block.y + 1) }
+  };
+
+  return { ...block, ...patches[direction] };
 }
 
 type Position = {
@@ -75,9 +59,9 @@ const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
 
 const OPPOSITE_DIRECTION: { [direction: string]: Direction } = {
-  left: "right",
-  right: "left",
   up: "down",
+  right: "left",
+  left: "right",
   down: "up"
 };
 
@@ -280,7 +264,7 @@ class App extends React.Component<Props, State> {
 
         <div className="controls">
           <div className="directional-container">
-            {["up", "right", "left", "down"].map((d: Direction) => (
+            {Object.keys(OPPOSITE_DIRECTION).map((d: Direction) => (
               <button
                 key={d}
                 className={`control ${d}`}
