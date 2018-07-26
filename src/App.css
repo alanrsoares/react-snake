@@ -160,9 +160,10 @@
 }
 
 .score {
+  border: solid 3px #ccc;
   position: relative;
   top: -50px;
-  left: -13px;
+  left: -10px;
   background: #accac7;
   color: white;
   text-align: right;
