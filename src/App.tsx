@@ -16,18 +16,18 @@ function safeIndex(x: number) {
   return x * 10 >= BOARD_SIZE ? 0 : x;
 }
 
-function moveBlock(direction: Direction, block: Block) {
+function moveBlock(direction: Direction, block: Block): Block {
   const patches = {
-    up: { y: safeIndex(block.y - 1) },
-    right: { x: safeIndex(block.x + 1) },
-    left: { x: safeIndex(block.x - 1) },
-    down: { y: safeIndex(block.y + 1) }
+    [DIRECTIONS.up]: { y: safeIndex(block.y - 1) },
+    [DIRECTIONS.down]: { y: safeIndex(block.y + 1) },
+    [DIRECTIONS.right]: { x: safeIndex(block.x + 1) },
+    [DIRECTIONS.left]: { x: safeIndex(block.x - 1) }
   };
 
   return { ...block, ...patches[direction] };
 }
 
-const randomFruit = () => ({
+const randomFruit = (): Fruit => ({
   value: FRUITS[utils.randomInt(0, FRUITS.length - 1)],
   y: utils.randomInt(0, PIXELS),
   x: utils.randomInt(0, PIXELS)
@@ -48,34 +48,39 @@ type Block = IPosition & {
   direction: Direction;
 };
 
+type Fruit = IPosition & { value: string };
+
 interface IState {
   animationFrameId: number;
   snake: Block[];
   turns: ITurns;
-  fruit: IPosition & { value: string };
+  fruit: Fruit;
   isPlaying: boolean;
   isGameOver: boolean;
   score: number;
 }
 
-type Status = keyof typeof GAME_STATUS;
+interface IDirections {
+  [direction: string]: Direction;
+}
 
 const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
 
-const GAME_STATUS = {
-  NEW_GAME: "NEW_GAME",
-  GAME_OVER: "GAME_OVER",
-  PLAYING: "PLAYING"
+const DIRECTIONS: IDirections = {
+  up: "up",
+  right: "right",
+  left: "left",
+  down: "down"
 };
 
-const OPPOSITE_DIRECTION: { [direction: string]: Direction } = {
-  up: "down",
-  right: "left",
-  left: "right",
-  down: "up"
+const OPPOSITE_DIRECTION: IDirections = {
+  [DIRECTIONS.up]: DIRECTIONS.down,
+  [DIRECTIONS.right]: DIRECTIONS.left,
+  [DIRECTIONS.left]: DIRECTIONS.right,
+  [DIRECTIONS.down]: DIRECTIONS.up
 };
 
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍑", "🍓", "🥝"];
@@ -215,17 +220,17 @@ export default class App extends React.Component<{}, IState> {
     }
   };
 
-  private handleJoyStickClick = (d: Direction) => (
+  private handleJoyStickClick = (direction: Direction) => (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
-    this.setDirection(d);
+    this.setDirection(direction);
   };
 
-  private drawPixel = (p: IPosition) =>
+  private drawPixel = (position: IPosition) =>
     this.ctx.fillRect(
-      p.x * PIXEL_SIZE,
-      p.y * PIXEL_SIZE,
+      position.x * PIXEL_SIZE,
+      position.y * PIXEL_SIZE,
       PIXEL_SIZE,
       PIXEL_SIZE
     );
@@ -236,17 +241,17 @@ export default class App extends React.Component<{}, IState> {
     this.ctx.font = `${PIXEL_SIZE * 1.8}px Segoe UI Emoji`;
     this.ctx.fillText(
       this.state.fruit.value,
-      this.state.fruit.x * PIXEL_SIZE - 6,
-      this.state.fruit.y * PIXEL_SIZE + 12
+      this.state.fruit.x * PIXEL_SIZE - 6, // arbitrary
+      this.state.fruit.y * PIXEL_SIZE + 12 // adjustments
     );
 
     this.state.snake.forEach((p: Block, i: number) => {
-      this.ctx.fillStyle = !i ? "#011627" : i % 2 ? "#E71D36" : "#FF9F1C";
+      const isHead = !i;
+
+      this.ctx.fillStyle = isHead ? "#011627" : i % 2 ? "#E71D36" : "#FF9F1C";
       this.drawPixel({ y: p.y, x: p.x });
     });
   };
-
-  private clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
   private play = () =>
     utils.delay(SPEED)(() => {
@@ -255,6 +260,8 @@ export default class App extends React.Component<{}, IState> {
         this.state.animationFrameId = window.requestAnimationFrame(this.play);
       }
     });
+
+  private clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
   private reset = () => this.setState(INITIAL_STATE, this.draw);
 
@@ -271,30 +278,29 @@ export default class App extends React.Component<{}, IState> {
 
       let hasEaten = false;
 
-      const snake = state.snake.map((p, i, xs) => {
-        const turn = getTurn(p, state.turns);
+      const snake = state.snake.map((block, i, xs) => {
+        const turn = getTurn(block, state.turns);
 
         if (i === xs.length - 1) {
-          delete turns[`${p.y}_${p.x}`];
+          delete turns[`${block.y}_${block.x}`];
         }
 
         if (!i /* is head */) {
-          if (areSamePosition(p)(fruit)) {
+          if (areSamePosition(block)(fruit)) {
             hasEaten = true;
             score++;
             fruit = randomFruit();
           }
-          if (xs.slice(1).some(areSamePosition(p))) {
+          if (xs.slice(1).some(areSamePosition(block))) {
             isPlaying = false;
             isGameOver = true;
             window.cancelAnimationFrame(this.state.animationFrameId);
           }
         }
 
-        const direction = turn || p.direction;
-        const block = { ...p, direction };
+        const direction = turn || block.direction;
 
-        return moveBlock(direction, block);
+        return moveBlock(direction, { ...block, direction });
       });
 
       if (hasEaten) {
