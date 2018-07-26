@@ -58,10 +58,18 @@ interface IState {
   score: number;
 }
 
+type Status = keyof typeof GAME_STATUS;
+
 const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
+
+const GAME_STATUS = {
+  NEW_GAME: "NEW_GAME",
+  GAME_OVER: "GAME_OVER",
+  PLAYING: "PLAYING"
+};
 
 const OPPOSITE_DIRECTION: { [direction: string]: Direction } = {
   up: "down",
@@ -156,11 +164,13 @@ export default class App extends React.Component<{}, IState> {
   }
 
   private renderControls() {
+    const directions = Object.keys(OPPOSITE_DIRECTION) as Direction[];
+
     return (
       <div className="controls">
         <div className="score">{this.state.score}</div>
         <div className="directional-container">
-          {Object.keys(OPPOSITE_DIRECTION).map((d: Direction) => (
+          {directions.map(d => (
             <button
               key={d}
               className={`control ${d}`}
@@ -178,15 +188,20 @@ export default class App extends React.Component<{}, IState> {
   private setDirection(move: Direction) {
     const { direction } = this.state.snake[0];
 
-    if (direction !== move && direction !== OPPOSITE_DIRECTION[move]) {
-      this.setState(({ turns, snake: [head, ...rest] }) => ({
-        turns: {
-          ...turns,
-          [`${head.y}_${head.x}`]: move
-        },
-        snake: [{ ...head, direction: move }, ...rest]
-      }));
+    const isIllegalMove =
+      direction === move || direction === OPPOSITE_DIRECTION[move];
+
+    if (isIllegalMove) {
+      return;
     }
+
+    this.setState(({ turns, snake: [head, ...rest] }) => ({
+      turns: {
+        ...turns,
+        [`${head.y}_${head.x}`]: move
+      },
+      snake: [{ ...head, direction: move }, ...rest]
+    }));
   }
 
   private handleKeyUp = ({ code }: KeyboardEvent) => {
