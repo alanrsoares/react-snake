@@ -52,6 +52,7 @@ type Fruit = IPosition & { value: string };
 
 interface IState {
   animationFrameId: number;
+  intervalId: number;
   snake: Block[];
   turns: ITurns;
   fruit: Fruit;
@@ -87,6 +88,7 @@ const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍑", "🍓", "🥝"];
 
 const INITIAL_STATE: IState = {
   animationFrameId: 0,
+  intervalId: 0,
   snake: [{ x: 5, y: 0, direction: "right" }],
   turns: {},
   fruit: randomFruit(),
@@ -111,6 +113,7 @@ export default class App extends React.Component<{}, IState> {
   public componentWillUnMount() {
     document.removeEventListener("keyup", this.handleKeyUp);
     window.cancelAnimationFrame(this.state.animationFrameId);
+    window.clearInterval(this.state.intervalId);
   }
 
   public componentDidMount() {
@@ -253,19 +256,23 @@ export default class App extends React.Component<{}, IState> {
     });
   };
 
-  private play = () =>
-    utils.delay(SPEED)(() => {
-      if (this.state.isPlaying && !this.state.isGameOver) {
-        this.move();
-        this.state.animationFrameId = window.requestAnimationFrame(this.play);
-      }
-    });
+  private play = () => {
+    this.draw();
+    this.state.animationFrameId = window.requestAnimationFrame(this.play);
+  };
 
   private clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
   private reset = () => this.setState(INITIAL_STATE, this.draw);
 
-  private start = () => this.setState({ isPlaying: true }, this.play);
+  private start = () => {
+    this.state.intervalId = window.setInterval(() => {
+      if (this.state.isPlaying && !this.state.isGameOver) {
+        this.move();
+      }
+    }, SPEED);
+    this.setState({ isPlaying: true }, this.play);
+  };
 
   private move = () => {
     this.setState(state => {
@@ -295,6 +302,7 @@ export default class App extends React.Component<{}, IState> {
             isPlaying = false;
             isGameOver = true;
             window.cancelAnimationFrame(this.state.animationFrameId);
+            window.clearInterval(this.state.intervalId);
           }
         }
 
