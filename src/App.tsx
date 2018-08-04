@@ -206,7 +206,7 @@ export default class App extends React.Component<{}, IState> {
               "best-score--beaten": hasBeatenBestScore
             })}
           >
-            <span className="best-score-label">best</span>
+            <span className="best-score-label">best: </span>
             <span>{this.state.bestScore}</span>
           </div>
         </div>
