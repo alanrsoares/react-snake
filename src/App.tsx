@@ -1,3 +1,4 @@
+import cn from "classnames";
 import * as React from "react";
 
 import "./App.css";
@@ -59,6 +60,7 @@ interface IState {
   isPlaying: boolean;
   isGameOver: boolean;
   score: number;
+  bestScore: number;
 }
 
 interface IDirections {
@@ -86,6 +88,8 @@ const OPPOSITE_DIRECTION: IDirections = {
 
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍑", "🍓", "🥝"];
 
+const LS_KEY = "react-snake-best-score";
+
 const INITIAL_STATE: IState = {
   animationFrameId: 0,
   intervalId: 0,
@@ -94,11 +98,19 @@ const INITIAL_STATE: IState = {
   fruit: randomFruit(),
   isPlaying: false,
   isGameOver: false,
-  score: 0
+  score: 0,
+  bestScore: JSON.parse(localStorage.getItem(LS_KEY) || "0")
 };
+
+const FPS60 = (1 / 6) * 100;
 
 export default class App extends React.Component<{}, IState> {
   public state: IState = INITIAL_STATE;
+  private lastRendered: number | null = null;
+
+  get timeElapsed() {
+    return Date.now() - (this.lastRendered || Date.now());
+  }
 
   get ctx() {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -174,9 +186,30 @@ export default class App extends React.Component<{}, IState> {
   private renderControls() {
     const directions = Object.keys(OPPOSITE_DIRECTION) as Direction[];
 
+    const hasBeatenBestScore = this.state.score > INITIAL_STATE.bestScore;
+
     return (
       <div className="controls">
-        <div className="score">{this.state.score}</div>
+        <div>
+          <div
+            className={cn("score", {
+              "score--best": hasBeatenBestScore
+            })}
+            style={{
+              background: this.state.isPlaying ? "#2EC4B6" : "#accac7"
+            }}
+          >
+            {this.state.score}
+          </div>
+          <div
+            className={cn("best-score", {
+              "best-score--beaten": hasBeatenBestScore
+            })}
+          >
+            <span className="best-score-label">best</span>
+            <span>{this.state.bestScore}</span>
+          </div>
+        </div>
         <div className="directional-container">
           {directions.map(d => (
             <button
@@ -258,12 +291,21 @@ export default class App extends React.Component<{}, IState> {
 
   private play = () => {
     this.draw();
+
     this.state.animationFrameId = window.requestAnimationFrame(this.play);
   };
 
   private clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
-  private reset = () => this.setState(INITIAL_STATE, this.draw);
+  private reset = () => {
+    this.setState(
+      {
+        ...INITIAL_STATE,
+        bestScore: JSON.parse(localStorage.getItem(LS_KEY) || "0")
+      },
+      this.draw
+    );
+  };
 
   private start = () => {
     this.state.intervalId = window.setInterval(() => {
@@ -275,6 +317,12 @@ export default class App extends React.Component<{}, IState> {
   };
 
   private move = () => {
+    if (this.lastRendered && this.timeElapsed < FPS60) {
+      return;
+    }
+
+    this.lastRendered = Date.now();
+
     this.setState(state => {
       const turns = state.turns;
 
@@ -282,6 +330,7 @@ export default class App extends React.Component<{}, IState> {
       let isPlaying = state.isPlaying;
       let isGameOver = state.isGameOver;
       let score = state.score;
+      let bestScore = state.bestScore;
 
       let hasEaten = false;
 
@@ -296,8 +345,13 @@ export default class App extends React.Component<{}, IState> {
           if (areSamePosition(block)(fruit)) {
             hasEaten = true;
             score++;
+            if (score > bestScore) {
+              bestScore = score;
+              localStorage.setItem(LS_KEY, JSON.stringify(score));
+            }
             fruit = randomFruit();
           }
+
           if (xs.slice(1).some(areSamePosition(block))) {
             isPlaying = false;
             isGameOver = true;
@@ -316,7 +370,7 @@ export default class App extends React.Component<{}, IState> {
         snake.push(moveBlock(OPPOSITE_DIRECTION[last.direction], last));
       }
 
-      return { snake, turns, fruit, isPlaying, isGameOver, score };
+      return { snake, turns, fruit, isPlaying, isGameOver, score, bestScore };
     }, this.draw);
   };
 }
