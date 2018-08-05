@@ -28,11 +28,21 @@ function moveBlock(direction: Direction, block: Block): Block {
   return { ...block, ...patches[direction] };
 }
 
-const randomFruit = (): Fruit => ({
+const makeRandomFruit = () => ({
   value: FRUITS[utils.randomInt(0, FRUITS.length - 1)],
   y: utils.randomInt(0, PIXELS),
   x: utils.randomInt(0, PIXELS)
 });
+
+const randomFruit = (snake: Block[]): Fruit => {
+  let fruit = makeRandomFruit();
+
+  while (snake.some(areSamePosition(fruit))) {
+    fruit = makeRandomFruit();
+  }
+
+  return fruit;
+};
 
 interface IPosition {
   x: number;
@@ -90,12 +100,14 @@ const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍑", "🍓", "🥝"];
 
 const LS_KEY = "react-snake-best-score";
 
+const SNAKE: Block[] = [{ x: 5, y: 0, direction: "right" }];
+
 const INITIAL_STATE: IState = {
   animationFrameId: 0,
   intervalId: 0,
-  snake: [{ x: 5, y: 0, direction: "right" }],
+  snake: SNAKE,
   turns: {},
-  fruit: randomFruit(),
+  fruit: randomFruit(SNAKE),
   isPlaying: false,
   isGameOver: false,
   score: 0,
@@ -185,8 +197,7 @@ export default class App extends React.Component<{}, IState> {
 
   private renderControls() {
     const directions = Object.keys(OPPOSITE_DIRECTION) as Direction[];
-
-    const hasBeatenBestScore = this.state.score > INITIAL_STATE.bestScore;
+    const hasBeatenBestScore = this.state.score >= this.state.bestScore;
 
     return (
       <div className="controls">
@@ -349,7 +360,7 @@ export default class App extends React.Component<{}, IState> {
               bestScore = score;
               localStorage.setItem(LS_KEY, JSON.stringify(score));
             }
-            fruit = randomFruit();
+            fruit = randomFruit(xs);
           }
 
           if (xs.slice(1).some(areSamePosition(block))) {
