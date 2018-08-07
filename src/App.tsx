@@ -144,6 +144,7 @@ export default class App extends React.Component<{}, IState> {
         <div
           className="canvas-container"
           style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
+          onClick={this.togglePlay}
         >
           {this.renderOverlay()}
 
@@ -180,7 +181,7 @@ export default class App extends React.Component<{}, IState> {
               </button>
             ) : (
               <button className="overlay-button" onClick={this.start}>
-                START
+                {this.state.intervalId ? "RESUME" : "START"}
               </button>
             )}
           </div>
@@ -271,6 +272,10 @@ export default class App extends React.Component<{}, IState> {
     );
 
   private draw = () => {
+    if (this.lastRendered && this.timeElapsed < FPS60) {
+      return;
+    }
+
     this.clear();
 
     this.ctx.font = `${PIXEL_SIZE * 1.8}px Segoe UI Emoji`;
@@ -294,6 +299,16 @@ export default class App extends React.Component<{}, IState> {
     this.state.animationFrameId = window.requestAnimationFrame(this.play);
   };
 
+  private togglePlay = () => {
+    if (this.state.isGameOver || !this.state.intervalId) {
+      return;
+    }
+
+    this.setState({
+      isPlaying: !this.state.isPlaying
+    });
+  };
+
   private clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
   private reset = () => {
@@ -309,17 +324,14 @@ export default class App extends React.Component<{}, IState> {
   private start = () => {
     this.state.intervalId = window.setInterval(() => {
       if (this.state.isPlaying && !this.state.isGameOver) {
-        this.move();
+        window.requestAnimationFrame(this.move);
       }
     }, SPEED);
+
     this.setState({ isPlaying: true }, this.play);
   };
 
   private move = () => {
-    if (this.lastRendered && this.timeElapsed < FPS60) {
-      return;
-    }
-
     this.lastRendered = Date.now();
 
     this.setState(state => {
