@@ -144,11 +144,12 @@ export default class App extends React.Component<{}, IState> {
         <div
           className="canvas-container"
           style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
-          onClick={this.togglePlay}
         >
           {this.renderOverlay()}
 
-          <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
+          <div onClick={this.togglePlay}>
+            <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
+          </div>
           <div className="under-canvas">REACT SNAKE 1988</div>
 
           {this.renderControls()}
@@ -322,6 +323,10 @@ export default class App extends React.Component<{}, IState> {
   };
 
   private start = () => {
+    if (this.state.intervalId) {
+      window.clearInterval(this.state.intervalId);
+    }
+
     this.state.intervalId = window.setInterval(() => {
       if (this.state.isPlaying && !this.state.isGameOver) {
         window.requestAnimationFrame(this.move);
