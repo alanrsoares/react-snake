@@ -56,8 +56,6 @@ type Block = IPosition & {
 type Fruit = IPosition & { value: string };
 
 interface IState {
-  animationFrameId: number;
-  intervalId: number;
   snake: Block[];
   direction: Direction;
   fruit: Fruit;
@@ -97,8 +95,6 @@ const LS_KEY = "react-snake-best-score";
 const SNAKE: Block[] = [{ x: 5, y: 0, direction: "right" }];
 
 const INITIAL_STATE: IState = {
-  animationFrameId: 0,
-  intervalId: 0,
   snake: SNAKE,
   direction: DIRECTIONS.right,
   fruit: randomFruit(SNAKE),
@@ -113,6 +109,8 @@ const FPS60 = (1 / 6) * 100;
 export default class App extends React.Component<{}, IState> {
   public state: IState = INITIAL_STATE;
   private lastRendered: number | null = null;
+  private animationFrameId: number = 0;
+  private intervalId: number = 0;
 
   get timeElapsed() {
     return Date.now() - (this.lastRendered || Date.now());
@@ -130,8 +128,7 @@ export default class App extends React.Component<{}, IState> {
 
   public componentWillUnMount() {
     document.removeEventListener("keyup", this.handleKeyUp);
-    window.cancelAnimationFrame(this.state.animationFrameId);
-    window.clearInterval(this.state.intervalId);
+    this.stop();
   }
 
   public componentDidMount() {
@@ -182,7 +179,7 @@ export default class App extends React.Component<{}, IState> {
               </button>
             ) : (
               <button className="overlay-button" onClick={this.start}>
-                {this.state.intervalId ? "RESUME" : "START"}
+                {this.intervalId ? "RESUME" : "START"}
               </button>
             )}
           </div>
@@ -297,11 +294,11 @@ export default class App extends React.Component<{}, IState> {
   private play = () => {
     this.draw();
 
-    this.state.animationFrameId = window.requestAnimationFrame(this.play);
+    this.animationFrameId = window.requestAnimationFrame(this.play);
   };
 
   private togglePlay = () => {
-    if (this.state.isGameOver || !this.state.intervalId) {
+    if (this.state.isGameOver || !this.intervalId) {
       return;
     }
 
@@ -322,12 +319,17 @@ export default class App extends React.Component<{}, IState> {
     );
   };
 
+  private stop = () => {
+    window.clearInterval(this.intervalId);
+    window.cancelAnimationFrame(this.animationFrameId);
+  };
+
   private start = () => {
-    if (this.state.intervalId) {
-      window.clearInterval(this.state.intervalId);
+    if (this.intervalId) {
+      this.stop();
     }
 
-    this.state.intervalId = window.setInterval(() => {
+    this.intervalId = window.setInterval(() => {
       if (this.state.isPlaying && !this.state.isGameOver) {
         window.requestAnimationFrame(this.move);
       }
@@ -355,8 +357,7 @@ export default class App extends React.Component<{}, IState> {
 
       // collided with self
       if (tail.some(isCollision)) {
-        window.cancelAnimationFrame(state.animationFrameId);
-        window.clearInterval(state.intervalId);
+        this.stop();
 
         return { ...state, snake, isPlaying: false, isGameOver: true };
       }
