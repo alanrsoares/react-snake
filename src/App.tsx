@@ -5,10 +5,8 @@ import "./App.css";
 
 import * as utils from "./utils";
 
-const areSamePosition = (a: IPosition) => (b: IPosition) =>
+const hasCollidedWith = (a: IPosition) => (b: IPosition) =>
   a.x === b.x && a.y === b.y;
-
-const getTurn = (b: Block, turns: ITurns) => turns[`${b.y}_${b.x}`];
 
 function safeIndex(x: number) {
   if (x < 0) {
@@ -37,7 +35,7 @@ const makeRandomFruit = () => ({
 const randomFruit = (snake: Block[]): Fruit => {
   let fruit = makeRandomFruit();
 
-  while (snake.some(areSamePosition(fruit))) {
+  while (snake.some(hasCollidedWith(fruit))) {
     fruit = makeRandomFruit();
   }
 
@@ -47,10 +45,6 @@ const randomFruit = (snake: Block[]): Fruit => {
 interface IPosition {
   x: number;
   y: number;
-}
-
-interface ITurns {
-  [index: string]: Direction;
 }
 
 type Direction = "up" | "down" | "left" | "right";
@@ -65,7 +59,7 @@ interface IState {
   animationFrameId: number;
   intervalId: number;
   snake: Block[];
-  turns: ITurns;
+  direction: Direction;
   fruit: Fruit;
   isPlaying: boolean;
   isGameOver: boolean;
@@ -106,7 +100,7 @@ const INITIAL_STATE: IState = {
   animationFrameId: 0,
   intervalId: 0,
   snake: SNAKE,
-  turns: {},
+  direction: DIRECTIONS.right,
   fruit: randomFruit(SNAKE),
   isPlaying: false,
   isGameOver: false,
@@ -154,7 +148,7 @@ export default class App extends React.Component<{}, IState> {
           {this.renderOverlay()}
 
           <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
-          <div className="under-canvas">REACT SNAKE 1998</div>
+          <div className="under-canvas">REACT SNAKE 1988</div>
 
           {this.renderControls()}
         </div>
@@ -196,7 +190,7 @@ export default class App extends React.Component<{}, IState> {
   }
 
   private renderControls() {
-    const directions = Object.keys(OPPOSITE_DIRECTION) as Direction[];
+    const directions = Object.keys(DIRECTIONS) as Direction[];
     const hasBeatenBestScore = this.state.score >= this.state.bestScore;
 
     return (
@@ -222,12 +216,12 @@ export default class App extends React.Component<{}, IState> {
           </div>
         </div>
         <div className="directional-container">
-          {directions.map(d => (
+          {directions.map(direction => (
             <button
-              key={d}
-              className={`control ${d}`}
+              key={direction}
+              className={`control ${direction}`}
               disabled={!this.state.isPlaying}
-              onClick={this.handleJoyStickClick(d)}
+              onClick={this.handleJoyStickClick(direction)}
             >
               <div className="control-text">↑</div>
             </button>
@@ -238,7 +232,7 @@ export default class App extends React.Component<{}, IState> {
   }
 
   private setDirection(move: Direction) {
-    const { direction } = this.state.snake[0];
+    const { direction } = this.state;
 
     const isIllegalMove =
       direction === move || direction === OPPOSITE_DIRECTION[move];
@@ -247,13 +241,7 @@ export default class App extends React.Component<{}, IState> {
       return;
     }
 
-    this.setState(({ turns, snake: [head, ...rest] }) => ({
-      turns: {
-        ...turns,
-        [`${head.y}_${head.x}`]: move
-      },
-      snake: [{ ...head, direction: move }, ...rest]
-    }));
+    this.setState({ direction: move });
   }
 
   private handleKeyUp = ({ code }: KeyboardEvent) => {
@@ -335,53 +323,52 @@ export default class App extends React.Component<{}, IState> {
     this.lastRendered = Date.now();
 
     this.setState(state => {
-      const turns = state.turns;
+      const snake = state.snake.slice();
 
-      let fruit = state.fruit;
-      let isPlaying = state.isPlaying;
-      let isGameOver = state.isGameOver;
-      let score = state.score;
-      let bestScore = state.bestScore;
-
-      let hasEaten = false;
-
-      const snake = state.snake.map((block, i, xs) => {
-        const turn = getTurn(block, state.turns);
-
-        if (i === xs.length - 1) {
-          delete turns[`${block.y}_${block.x}`];
-        }
-
-        if (!i /* is head */) {
-          if (areSamePosition(block)(fruit)) {
-            hasEaten = true;
-            score++;
-            if (score > bestScore) {
-              bestScore = score;
-              localStorage.setItem(LS_KEY, JSON.stringify(score));
-            }
-            fruit = randomFruit(xs);
-          }
-
-          if (xs.slice(1).some(areSamePosition(block))) {
-            isPlaying = false;
-            isGameOver = true;
-            window.cancelAnimationFrame(this.state.animationFrameId);
-            window.clearInterval(this.state.intervalId);
-          }
-        }
-
-        const direction = turn || block.direction;
-
-        return moveBlock(direction, { ...block, direction });
+      // move snake
+      snake.splice(0, 1, {
+        ...moveBlock(state.direction, snake[0]),
+        direction: state.direction
       });
+      snake.pop();
 
-      if (hasEaten) {
-        const last = snake[snake.length - 1];
-        snake.push(moveBlock(OPPOSITE_DIRECTION[last.direction], last));
+      const [head, ...tail] = snake;
+      const isCollision = hasCollidedWith(head);
+
+      // collided with self
+      if (tail.some(isCollision)) {
+        window.cancelAnimationFrame(this.state.animationFrameId);
+        window.clearInterval(this.state.intervalId);
+
+        return { ...state, snake, isPlaying: false, isGameOver: true };
       }
 
-      return { snake, turns, fruit, isPlaying, isGameOver, score, bestScore };
+      // collided with fruit
+      if (isCollision(state.fruit)) {
+        // add new block to snake's end
+        const last = snake[snake.length - 1];
+        snake.push(moveBlock(OPPOSITE_DIRECTION[last.direction], last));
+
+        // increment score
+        const score = state.score + 1;
+        const bestScore = score > state.bestScore ? score : state.bestScore;
+
+        // persist best score to localstorage
+        if (score > bestScore) {
+          localStorage.setItem(LS_KEY, JSON.stringify(score));
+        }
+
+        return {
+          ...state,
+          snake,
+          score,
+          bestScore,
+          fruit: randomFruit(snake)
+        };
+      }
+
+      // just moved
+      return { ...state, snake };
     }, this.draw);
   };
 }
