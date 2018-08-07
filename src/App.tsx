@@ -323,13 +323,14 @@ export default class App extends React.Component<{}, IState> {
     this.lastRendered = Date.now();
 
     this.setState(state => {
-      const snake = state.snake.slice();
-
       // move snake
-      snake.splice(0, 1, {
-        ...moveBlock(state.direction, snake[0]),
-        direction: state.direction
-      });
+      const snake = [
+        {
+          ...moveBlock(state.direction, state.snake[0]),
+          direction: state.direction
+        },
+        ...state.snake
+      ];
       snake.pop();
 
       const [head, ...tail] = snake;
@@ -337,8 +338,8 @@ export default class App extends React.Component<{}, IState> {
 
       // collided with self
       if (tail.some(isCollision)) {
-        window.cancelAnimationFrame(this.state.animationFrameId);
-        window.clearInterval(this.state.intervalId);
+        window.cancelAnimationFrame(state.animationFrameId);
+        window.clearInterval(state.intervalId);
 
         return { ...state, snake, isPlaying: false, isGameOver: true };
       }
@@ -358,13 +359,7 @@ export default class App extends React.Component<{}, IState> {
           localStorage.setItem(LS_KEY, JSON.stringify(score));
         }
 
-        return {
-          ...state,
-          snake,
-          score,
-          bestScore,
-          fruit: randomFruit(snake)
-        };
+        return { ...state, snake, score, bestScore, fruit: randomFruit(snake) };
       }
 
       // just moved
