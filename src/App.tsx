@@ -15,6 +15,25 @@ function safeIndex(x: number) {
   return x * 10 >= BOARD_SIZE ? 0 : x;
 }
 
+function decodeDirectionKey(keyCode: string) {
+  switch (keyCode) {
+    case "KeyW":
+    case "ArrowUp":
+      return DIRECTIONS.up;
+    case "KeyS":
+    case "ArrowDown":
+      return DIRECTIONS.down;
+    case "KeyA":
+    case "ArrowLeft":
+      return DIRECTIONS.left;
+    case "KeyD":
+    case "ArrowRight":
+      return DIRECTIONS.right;
+    default:
+      return null;
+  }
+}
+
 function moveBlock(direction: Direction, block: Block): Block {
   const patches = {
     [DIRECTIONS.up]: { y: safeIndex(block.y - 1) },
@@ -24,6 +43,10 @@ function moveBlock(direction: Direction, block: Block): Block {
   };
 
   return { ...block, ...patches[direction] };
+}
+
+function timeElapsed(timeStamp: number) {
+  return Date.now() - (timeStamp || Date.now());
 }
 
 const makeRandomFruit = () => ({
@@ -104,17 +127,10 @@ const INITIAL_STATE: IState = {
   bestScore: JSON.parse(localStorage.getItem(LS_KEY) || "0")
 };
 
-const FPS60 = (1 / 6) * 100;
-
 export default class App extends React.Component<{}, IState> {
   public state: IState = INITIAL_STATE;
-  private lastRendered: number | null = null;
+  private lastMoved: number | null = null;
   private animationFrameId: number = 0;
-  private intervalId: number = 0;
-
-  get timeElapsed() {
-    return Date.now() - (this.lastRendered || Date.now());
-  }
 
   get ctx() {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -147,7 +163,7 @@ export default class App extends React.Component<{}, IState> {
           <div onClick={this.togglePlay}>
             <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
           </div>
-          <div className="under-canvas">REACT SNAKE 1988</div>
+          <div className="under-canvas">REACT SNAKE 1978</div>
 
           {this.renderControls()}
         </div>
@@ -179,7 +195,7 @@ export default class App extends React.Component<{}, IState> {
               </button>
             ) : (
               <button className="overlay-button" onClick={this.start}>
-                {this.intervalId ? "RESUME" : "START"}
+                {this.animationFrameId ? "RESUME" : "START"}
               </button>
             )}
           </div>
@@ -240,14 +256,11 @@ export default class App extends React.Component<{}, IState> {
       return;
     }
 
-    this.setState({ direction: move });
+    this.setState({ direction: move }, this.move);
   }
 
   private handleKeyUp = ({ code }: KeyboardEvent) => {
-    const prefix = "Arrow";
-    const move: Direction | null = code.startsWith(prefix)
-      ? (code.replace(prefix, "").toLowerCase() as Direction)
-      : null;
+    const move = decodeDirectionKey(code);
 
     if (move) {
       this.setDirection(move);
@@ -270,35 +283,33 @@ export default class App extends React.Component<{}, IState> {
     );
 
   private draw = () => {
-    if (this.lastRendered && this.timeElapsed < FPS60) {
-      return;
-    }
-
     this.clear();
+
+    this.state.snake.forEach((block, i) => {
+      const isHead = !i;
+
+      this.ctx.fillStyle = isHead ? "#011627" : i % 2 ? "#E71D36" : "#FF9F1C";
+      this.drawPixel(block);
+    });
 
     this.ctx.font = `${PIXEL_SIZE * 1.8}px Segoe UI Emoji`;
     this.ctx.fillText(
       this.state.fruit.value,
-      this.state.fruit.x * PIXEL_SIZE - 6, // arbitrary
-      this.state.fruit.y * PIXEL_SIZE + 12 // adjustments
+      this.state.fruit.x * PIXEL_SIZE - 6,
+      this.state.fruit.y * PIXEL_SIZE + 12
     );
-
-    this.state.snake.forEach((p: Block, i: number) => {
-      const isHead = !i;
-
-      this.ctx.fillStyle = isHead ? "#011627" : i % 2 ? "#E71D36" : "#FF9F1C";
-      this.drawPixel({ y: p.y, x: p.x });
-    });
   };
 
   private play = () => {
-    this.draw();
+    if (this.state.isPlaying && !this.state.isGameOver) {
+      this.move();
+    }
 
     this.animationFrameId = window.requestAnimationFrame(this.play);
   };
 
   private togglePlay = () => {
-    if (this.state.isGameOver || !this.intervalId) {
+    if (this.state.isGameOver || !this.animationFrameId) {
       return;
     }
 
@@ -310,7 +321,6 @@ export default class App extends React.Component<{}, IState> {
   private clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
   private reset = () => {
-    this.stop();
     this.setState(
       {
         ...INITIAL_STATE,
@@ -321,27 +331,24 @@ export default class App extends React.Component<{}, IState> {
   };
 
   private stop = () => {
-    window.clearInterval(this.intervalId);
     window.cancelAnimationFrame(this.animationFrameId);
+
+    this.animationFrameId = 0;
   };
 
   private start = () => {
-    if (this.intervalId) {
+    if (this.animationFrameId) {
       this.stop();
     }
-
-    this.intervalId = window.setInterval(() => {
-      if (this.state.isPlaying && !this.state.isGameOver) {
-        window.requestAnimationFrame(this.move);
-      }
-    }, SPEED);
 
     this.setState({ isPlaying: true }, this.play);
   };
 
   private move = () => {
-    this.lastRendered = Date.now();
-
+    if (this.lastMoved && timeElapsed(this.lastMoved) < SPEED) {
+      return;
+    }
+    this.lastMoved = Date.now();
     this.setState(state => {
       // move snake
       const snake = [
