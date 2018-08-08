@@ -310,6 +310,7 @@ export default class App extends React.Component<{}, IState> {
   private clear = () => this.ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
 
   private reset = () => {
+    this.stop();
     this.setState(
       {
         ...INITIAL_STATE,
