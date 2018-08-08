@@ -78,6 +78,10 @@ type Block = IPosition & {
 
 type Fruit = IPosition & { value: string };
 
+interface IDirections {
+  [direction: string]: Direction;
+}
+
 interface IState {
   snake: Block[];
   move: {
@@ -89,10 +93,7 @@ interface IState {
   isGameOver: boolean;
   score: number;
   bestScore: number;
-}
-
-interface IDirections {
-  [direction: string]: Direction;
+  animationFrameId: number;
 }
 
 const BOARD_SIZE = 330;
@@ -130,13 +131,13 @@ const INITIAL_STATE: IState = {
   isPlaying: false,
   isGameOver: false,
   score: 0,
-  bestScore: JSON.parse(localStorage.getItem(LS_KEY) || "0")
+  bestScore: JSON.parse(localStorage.getItem(LS_KEY) || "0"),
+  animationFrameId: 0
 };
 
 export default class App extends React.Component<{}, IState> {
   public state: IState = INITIAL_STATE;
   private lastMoved: number | null = null;
-  private animationFrameId: number = 0;
 
   get ctx() {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -201,7 +202,7 @@ export default class App extends React.Component<{}, IState> {
               </button>
             ) : (
               <button className="overlay-button" onClick={this.start}>
-                {this.animationFrameId ? "RESUME" : "START"}
+                {this.state.animationFrameId ? "RESUME" : "START"}
               </button>
             )}
           </div>
@@ -316,11 +317,11 @@ export default class App extends React.Component<{}, IState> {
       this.move();
     }
 
-    this.animationFrameId = window.requestAnimationFrame(this.play);
+    this.state.animationFrameId = window.requestAnimationFrame(this.play);
   };
 
   private togglePlay = () => {
-    if (this.state.isGameOver || !this.animationFrameId) {
+    if (this.state.isGameOver || !this.state.animationFrameId) {
       return;
     }
 
@@ -342,13 +343,13 @@ export default class App extends React.Component<{}, IState> {
   };
 
   private stop = () => {
-    window.cancelAnimationFrame(this.animationFrameId);
+    window.cancelAnimationFrame(this.state.animationFrameId);
 
-    this.animationFrameId = 0;
+    this.state.animationFrameId = 0;
   };
 
   private start = () => {
-    if (this.animationFrameId) {
+    if (this.state.animationFrameId) {
       this.stop();
     }
 
