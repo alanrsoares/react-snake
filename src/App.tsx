@@ -80,7 +80,10 @@ type Fruit = IPosition & { value: string };
 
 interface IState {
   snake: Block[];
-  direction: Direction;
+  move: {
+    direction: Direction;
+    processed: boolean;
+  };
   fruit: Fruit;
   isPlaying: boolean;
   isGameOver: boolean;
@@ -119,7 +122,10 @@ const SNAKE: Block[] = [{ x: 5, y: 0, direction: "right" }];
 
 const INITIAL_STATE: IState = {
   snake: SNAKE,
-  direction: DIRECTIONS.right,
+  move: {
+    direction: DIRECTIONS.right,
+    processed: false
+  },
   fruit: randomFruit(SNAKE),
   isPlaying: false,
   isGameOver: false,
@@ -246,17 +252,22 @@ export default class App extends React.Component<{}, IState> {
     );
   }
 
-  private setDirection(move: Direction) {
-    const { direction } = this.state;
+  private setDirection(moveDirection: Direction) {
+    const { move } = this.state;
 
     const isIllegalMove =
-      direction === move || direction === OPPOSITE_DIRECTION[move];
+      !move.processed ||
+      move.direction === moveDirection ||
+      move.direction === OPPOSITE_DIRECTION[moveDirection];
 
     if (isIllegalMove) {
       return;
     }
 
-    this.setState({ direction: move }, this.move);
+    this.setState(
+      { move: { direction: moveDirection, processed: false } },
+      this.move
+    );
   }
 
   private handleKeyUp = ({ code }: KeyboardEvent) => {
@@ -351,10 +362,11 @@ export default class App extends React.Component<{}, IState> {
     this.lastMoved = Date.now();
     this.setState(state => {
       // move snake
+      const move = { ...state.move, processed: true };
       const snake = [
         {
-          ...moveBlock(state.direction, state.snake[0]),
-          direction: state.direction
+          ...moveBlock(state.move.direction, state.snake[0]),
+          direction: state.move.direction
         },
         ...state.snake
       ];
@@ -367,7 +379,7 @@ export default class App extends React.Component<{}, IState> {
       if (tail.some(isCollision)) {
         this.stop();
 
-        return { ...state, snake, isPlaying: false, isGameOver: true };
+        return { ...state, snake, move, isPlaying: false, isGameOver: true };
       }
 
       // collided with fruit
@@ -385,11 +397,18 @@ export default class App extends React.Component<{}, IState> {
           localStorage.setItem(LS_KEY, JSON.stringify(score));
         }
 
-        return { ...state, snake, score, bestScore, fruit: randomFruit(snake) };
+        return {
+          ...state,
+          snake,
+          move,
+          score,
+          bestScore,
+          fruit: randomFruit(snake)
+        };
       }
 
       // just moved
-      return { ...state, snake };
+      return { ...state, snake, move };
     }, this.draw);
   };
 }
