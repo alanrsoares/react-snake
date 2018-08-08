@@ -170,7 +170,7 @@ export default class App extends React.Component<{}, IState> {
           <div onClick={this.togglePlay}>
             <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
           </div>
-          <div className="under-canvas">REACT SNAKE 1978</div>
+          <div className="under-canvas">REACT SNAKE 1987</div>
 
           {this.renderControls()}
         </div>
