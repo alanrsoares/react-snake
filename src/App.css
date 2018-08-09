@@ -110,6 +110,7 @@
   height: 70px;
   background: #dedede;
   outline: none;
+  user-select: none;
 }
 
 .control:hover {

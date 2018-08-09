@@ -3,92 +3,16 @@ import * as React from "react";
 
 import "./App.css";
 
+import * as game from "./game";
 import * as utils from "./utils";
 
-const hasCollidedWith = (a: IPosition) => (b: IPosition) =>
-  a.x === b.x && a.y === b.y;
-
-function safeIndex(x: number) {
-  if (x < 0) {
-    return BOARD_SIZE / PIXEL_SIZE - 1;
-  }
-  return x * 10 >= BOARD_SIZE ? 0 : x;
-}
-
-function decodeDirectionKey(keyCode: string) {
-  switch (keyCode) {
-    case "KeyW":
-    case "ArrowUp":
-      return DIRECTIONS.up;
-    case "KeyS":
-    case "ArrowDown":
-      return DIRECTIONS.down;
-    case "KeyA":
-    case "ArrowLeft":
-      return DIRECTIONS.left;
-    case "KeyD":
-    case "ArrowRight":
-      return DIRECTIONS.right;
-    default:
-      return null;
-  }
-}
-
-function moveBlock(direction: Direction, block: Block): Block {
-  const patches = {
-    [DIRECTIONS.up]: { y: safeIndex(block.y - 1) },
-    [DIRECTIONS.down]: { y: safeIndex(block.y + 1) },
-    [DIRECTIONS.right]: { x: safeIndex(block.x + 1) },
-    [DIRECTIONS.left]: { x: safeIndex(block.x - 1) }
-  };
-
-  return { ...block, ...patches[direction] };
-}
-
-function timeElapsed(timeStamp: number) {
-  return Date.now() - (timeStamp || Date.now());
-}
-
-const makeRandomFruit = () => ({
-  value: FRUITS[utils.randomInt(0, FRUITS.length - 1)],
-  y: utils.randomInt(0, PIXELS),
-  x: utils.randomInt(0, PIXELS)
-});
-
-const randomFruit = (snake: Block[]): Fruit => {
-  let fruit = makeRandomFruit();
-
-  while (snake.some(hasCollidedWith(fruit))) {
-    fruit = makeRandomFruit();
-  }
-
-  return fruit;
-};
-
-interface IPosition {
-  x: number;
-  y: number;
-}
-
-type Direction = "up" | "down" | "left" | "right";
-
-type Block = IPosition & {
-  direction: Direction;
-};
-
-type Fruit = IPosition & { value: string };
-
-interface IDirections {
-  [direction: string]: Direction;
-}
-
 interface IState {
-  snake: Block[];
+  snake: game.Block[];
   move: {
-    direction: Direction;
+    direction: game.Direction;
     processed: boolean;
   };
-  fruit: Fruit;
+  fruit: game.Fruit;
   isPlaying: boolean;
   isGameOver: boolean;
   score: number;
@@ -96,38 +20,24 @@ interface IState {
   animationFrameId: number;
 }
 
+// config
+
 const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
 
-const DIRECTIONS: IDirections = {
-  up: "up",
-  right: "right",
-  left: "left",
-  down: "down"
-};
-
-const OPPOSITE_DIRECTION: IDirections = {
-  [DIRECTIONS.up]: DIRECTIONS.down,
-  [DIRECTIONS.right]: DIRECTIONS.left,
-  [DIRECTIONS.left]: DIRECTIONS.right,
-  [DIRECTIONS.down]: DIRECTIONS.up
-};
-
-const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍑", "🍓", "🥝"];
-
 const LS_KEY = "react-snake-best-score";
 
-const SNAKE: Block[] = [{ x: 5, y: 0, direction: "right" }];
+const SNAKE: game.Block[] = [{ x: 5, y: 0, direction: "right" }];
 
 const INITIAL_STATE: IState = {
   snake: SNAKE,
   move: {
-    direction: DIRECTIONS.right,
+    direction: game.Directions.right,
     processed: false
   },
-  fruit: randomFruit(SNAKE),
+  fruit: game.randomFruit(SNAKE, PIXELS),
   isPlaying: false,
   isGameOver: false,
   score: 0,
@@ -137,7 +47,6 @@ const INITIAL_STATE: IState = {
 
 export default class App extends React.Component<{}, IState> {
   public state: IState = INITIAL_STATE;
-  private lastMoved: number | null = null;
 
   get ctx() {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -145,7 +54,10 @@ export default class App extends React.Component<{}, IState> {
     return canvas.getContext("2d") as CanvasRenderingContext2D;
   }
 
-  public componentWillMount() {
+  constructor(props: {}) {
+    super(props);
+
+    this.move = utils.throttle(SPEED, this.move);
     document.addEventListener("keyup", this.handleKeyUp);
   }
 
@@ -170,7 +82,7 @@ export default class App extends React.Component<{}, IState> {
           <div onClick={this.togglePlay}>
             <canvas id="canvas" width={BOARD_SIZE} height={BOARD_SIZE} />
           </div>
-          <div className="under-canvas">REACT SNAKE 1987</div>
+          <div className="under-canvas">REACT SNAKE 1978</div>
 
           {this.renderControls()}
         </div>
@@ -212,7 +124,7 @@ export default class App extends React.Component<{}, IState> {
   }
 
   private renderControls() {
-    const directions = Object.keys(DIRECTIONS) as Direction[];
+    const directions = Object.keys(game.Directions) as game.Direction[];
     const hasBeatenBestScore = this.state.score >= this.state.bestScore;
 
     return (
@@ -222,9 +134,7 @@ export default class App extends React.Component<{}, IState> {
             className={cn("score", {
               "score--best": hasBeatenBestScore
             })}
-            style={{
-              background: this.state.isPlaying ? "#2EC4B6" : "#accac7"
-            }}
+            style={{ background: this.state.isPlaying ? "#2EC4B6" : "#accac7" }}
           >
             {this.state.score}
           </div>
@@ -253,13 +163,13 @@ export default class App extends React.Component<{}, IState> {
     );
   }
 
-  private setDirection(moveDirection: Direction) {
+  private setDirection(moveDirection: game.Direction) {
     const { move } = this.state;
 
     const isIllegalMove =
       !move.processed ||
       move.direction === moveDirection ||
-      move.direction === OPPOSITE_DIRECTION[moveDirection];
+      move.direction === game.OppositeDirections[moveDirection];
 
     if (isIllegalMove) {
       return;
@@ -272,21 +182,21 @@ export default class App extends React.Component<{}, IState> {
   }
 
   private handleKeyUp = ({ code }: KeyboardEvent) => {
-    const move = decodeDirectionKey(code);
+    const move = game.decodeDirectionKey(code);
 
     if (move) {
       this.setDirection(move);
     }
   };
 
-  private handleJoyStickClick = (direction: Direction) => (
+  private handleJoyStickClick = (direction: game.Direction) => (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
     this.setDirection(direction);
   };
 
-  private drawPixel = (position: IPosition) =>
+  private drawPixel = (position: game.IPosition) =>
     this.ctx.fillRect(
       position.x * PIXEL_SIZE,
       position.y * PIXEL_SIZE,
@@ -357,16 +267,15 @@ export default class App extends React.Component<{}, IState> {
   };
 
   private move = () => {
-    if (this.lastMoved && timeElapsed(this.lastMoved) < SPEED) {
-      return;
-    }
-    this.lastMoved = Date.now();
     this.setState(state => {
       // move snake
       const move = { ...state.move, processed: true };
       const snake = [
         {
-          ...moveBlock(state.move.direction, state.snake[0]),
+          ...game.moveBlock(state.move.direction, state.snake[0], {
+            board: BOARD_SIZE,
+            pixel: PIXEL_SIZE
+          }),
           direction: state.move.direction
         },
         ...state.snake
@@ -374,7 +283,7 @@ export default class App extends React.Component<{}, IState> {
       snake.pop();
 
       const [head, ...tail] = snake;
-      const isCollision = hasCollidedWith(head);
+      const isCollision = game.hasCollidedWith(head);
 
       // collided with self
       if (tail.some(isCollision)) {
@@ -387,7 +296,12 @@ export default class App extends React.Component<{}, IState> {
       if (isCollision(state.fruit)) {
         // add new block to snake's end
         const last = snake[snake.length - 1];
-        snake.push(moveBlock(OPPOSITE_DIRECTION[last.direction], last));
+        snake.push(
+          game.moveBlock(game.OppositeDirections[last.direction], last, {
+            board: BOARD_SIZE,
+            pixel: PIXEL_SIZE
+          })
+        );
 
         // increment score
         const score = state.score + 1;
@@ -404,7 +318,7 @@ export default class App extends React.Component<{}, IState> {
           move,
           score,
           bestScore,
-          fruit: randomFruit(snake)
+          fruit: game.randomFruit(snake, PIXELS)
         };
       }
 
