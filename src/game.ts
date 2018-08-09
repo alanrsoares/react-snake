@@ -14,7 +14,7 @@ export enum Directions {
 
 export enum OppositeDirections {
   up = Directions.down,
-  ight = Directions.left,
+  right = Directions.left,
   left = Directions.right,
   down = Directions.up
 }

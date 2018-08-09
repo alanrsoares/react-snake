@@ -166,22 +166,19 @@ export default class App extends React.Component<{}, IState> {
     );
   }
 
-  private setDirection(moveDirection: game.Direction) {
+  private setDirection(direction: game.Direction) {
     const { move } = this.state;
 
     const isIllegalMove =
       !move.processed ||
-      move.direction === moveDirection ||
-      move.direction === game.OppositeDirections[moveDirection];
+      move.direction === direction ||
+      move.direction === game.OppositeDirections[direction];
 
     if (isIllegalMove) {
       return;
     }
 
-    this.setState(
-      { move: { direction: moveDirection, processed: false } },
-      this.move
-    );
+    this.setState({ move: { direction, processed: false } }, this.move);
   }
 
   private handleKeyUp = ({ code }: KeyboardEvent) => {
