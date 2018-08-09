@@ -8,10 +8,7 @@ import * as utils from "./utils";
 
 interface IState {
   snake: game.Block[];
-  move: {
-    direction: game.Direction;
-    processed: boolean;
-  };
+  moves: game.Direction[];
   fruit: game.Fruit;
   isPlaying: boolean;
   isGameOver: boolean;
@@ -34,10 +31,7 @@ const SNAKE: game.Block[] = [{ x: 5, y: 0, direction: "right" }];
 
 const INITIAL_STATE: IState = {
   snake: SNAKE,
-  move: {
-    direction: game.Directions.right,
-    processed: false
-  },
+  moves: [game.Directions.right],
   fruit: game.randomFruit(SNAKE, PIXELS, FRUITS),
   isPlaying: false,
   isGameOver: false,
@@ -167,18 +161,20 @@ export default class App extends React.Component<{}, IState> {
   }
 
   private setDirection(direction: game.Direction) {
-    const { move } = this.state;
+    const move =
+      utils.last(this.state.moves) || utils.head(this.state.snake).direction;
 
     const isIllegalMove =
-      !move.processed ||
-      move.direction === direction ||
-      move.direction === game.OppositeDirections[direction];
+      move === direction || move === game.OppositeDirections[direction];
 
     if (isIllegalMove) {
       return;
     }
 
-    this.setState({ move: { direction, processed: false } }, this.move);
+    this.setState(
+      state => ({ moves: state.moves.concat(direction) }),
+      this.move
+    );
   }
 
   private handleKeyUp = ({ code }: KeyboardEvent) => {
@@ -271,17 +267,17 @@ export default class App extends React.Component<{}, IState> {
     this.setState(state => {
       // move snake
 
-      const move = { ...state.move, processed: true };
-      const snake = [
-        {
-          ...game.moveBlock(move.direction, utils.head(state.snake), {
-            board: BOARD_SIZE,
-            pixel: PIXEL_SIZE
-          }),
-          direction: move.direction
-        },
-        ...state.snake
-      ];
+      const move = state.moves.shift();
+      const snake = [...state.snake];
+      const direction = move || utils.head(state.snake).direction;
+
+      snake.unshift({
+        ...game.moveBlock(direction, utils.head(state.snake), {
+          board: BOARD_SIZE,
+          pixel: PIXEL_SIZE
+        }),
+        direction
+      });
       snake.pop();
 
       const [head, ...tail] = snake;

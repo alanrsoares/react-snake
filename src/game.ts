@@ -54,8 +54,8 @@ export function moveBlock(
 
 export const makeRandomFruit = (pixels: number, fruits: string[]) => ({
   value: fruits[utils.randomInt(0, fruits.length - 1)],
-  y: utils.randomInt(0, pixels),
-  x: utils.randomInt(0, pixels)
+  y: utils.randomInt(1, pixels),
+  x: utils.randomInt(1, pixels)
 });
 
 export const randomFruit = (
