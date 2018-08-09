@@ -306,7 +306,7 @@ export default class App extends React.Component<{}, IState> {
         const bestScore = score > state.bestScore ? score : state.bestScore;
 
         // persist best score to localstorage
-        if (score > bestScore) {
+        if (score >= bestScore) {
           localStorage.setItem(LS_KEY, JSON.stringify(score));
         }
 
