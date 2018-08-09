@@ -12,12 +12,12 @@ export enum Directions {
   down = "down"
 }
 
-export enum OppositeDirections {
-  up = Directions.down,
-  right = Directions.left,
-  left = Directions.right,
-  down = Directions.up
-}
+export const OppositeDirections = {
+  up: Directions.down,
+  right: Directions.left,
+  left: Directions.right,
+  down: Directions.up
+};
 
 export type Direction = keyof typeof Directions;
 
