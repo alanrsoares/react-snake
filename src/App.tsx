@@ -21,14 +21,15 @@ interface IState {
 }
 
 // config
-
+const LS_KEY = "react-snake-best-score";
 const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
+const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍓", "🥝"];
+const FRAME_RATE = (1 / 60) * 1000; // 60fps
 
-const LS_KEY = "react-snake-best-score";
-
+// initial state
 const SNAKE: game.Block[] = [{ x: 5, y: 0, direction: "right" }];
 
 const INITIAL_STATE: IState = {
@@ -37,7 +38,7 @@ const INITIAL_STATE: IState = {
     direction: game.Directions.right,
     processed: false
   },
-  fruit: game.randomFruit(SNAKE, PIXELS),
+  fruit: game.randomFruit(SNAKE, PIXELS, FRUITS),
   isPlaying: false,
   isGameOver: false,
   score: 0,
@@ -58,6 +59,8 @@ export default class App extends React.Component<{}, IState> {
     super(props);
 
     this.move = utils.throttle(SPEED, this.move);
+    this.draw = utils.throttle(FRAME_RATE, this.draw);
+
     document.addEventListener("keyup", this.handleKeyUp);
   }
 
@@ -225,6 +228,7 @@ export default class App extends React.Component<{}, IState> {
   private play = () => {
     if (this.state.isPlaying && !this.state.isGameOver) {
       this.move();
+      this.draw();
     }
 
     this.state.animationFrameId = window.requestAnimationFrame(this.play);
@@ -269,14 +273,15 @@ export default class App extends React.Component<{}, IState> {
   private move = () => {
     this.setState(state => {
       // move snake
+
       const move = { ...state.move, processed: true };
       const snake = [
         {
-          ...game.moveBlock(state.move.direction, state.snake[0], {
+          ...game.moveBlock(move.direction, utils.head(state.snake), {
             board: BOARD_SIZE,
             pixel: PIXEL_SIZE
           }),
-          direction: state.move.direction
+          direction: move.direction
         },
         ...state.snake
       ];
@@ -295,7 +300,7 @@ export default class App extends React.Component<{}, IState> {
       // collided with fruit
       if (isCollision(state.fruit)) {
         // add new block to snake's end
-        const last = snake[snake.length - 1];
+        const last = utils.last(snake);
         snake.push(
           game.moveBlock(game.OppositeDirections[last.direction], last, {
             board: BOARD_SIZE,
@@ -318,12 +323,12 @@ export default class App extends React.Component<{}, IState> {
           move,
           score,
           bestScore,
-          fruit: game.randomFruit(snake, PIXELS)
+          fruit: game.randomFruit(snake, PIXELS, FRUITS)
         };
       }
 
       // just moved
       return { ...state, snake, move };
-    }, this.draw);
+    });
   };
 }

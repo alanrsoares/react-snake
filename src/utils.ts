@@ -1,6 +1,3 @@
-export const delay = (time: number) => (fn: () => void) =>
-  window.setTimeout(fn, time);
-
 export const randomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -17,3 +14,7 @@ export const throttle = (time: number, fn: () => void) => {
     lastExecuted = Date.now();
   };
 };
+
+export const head = <T>(xs: T[]): T => xs[0];
+
+export const last = <T>(xs: T[]): T => xs[xs.length - 1];

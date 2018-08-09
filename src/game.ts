@@ -27,8 +27,6 @@ export type Block = IPosition & {
 
 export type Fruit = IPosition & { value: string };
 
-const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍓", "🥝"];
-
 export const hasCollidedWith = (a: IPosition) => (b: IPosition) =>
   a.x === b.x && a.y === b.y;
 
@@ -54,17 +52,21 @@ export function moveBlock(
   return { ...block, ...patches[direction] };
 }
 
-export const makeRandomFruit = (pixels: number) => ({
-  value: FRUITS[utils.randomInt(0, FRUITS.length - 1)],
+export const makeRandomFruit = (pixels: number, fruits: string[]) => ({
+  value: fruits[utils.randomInt(0, fruits.length - 1)],
   y: utils.randomInt(0, pixels),
   x: utils.randomInt(0, pixels)
 });
 
-export const randomFruit = (snake: Block[], pixels: number): Fruit => {
-  let fruit = makeRandomFruit(pixels);
+export const randomFruit = (
+  snake: Block[],
+  pixels: number,
+  fruits: string[]
+): Fruit => {
+  let fruit = makeRandomFruit(pixels, fruits);
 
   while (snake.some(hasCollidedWith(fruit))) {
-    fruit = makeRandomFruit(pixels);
+    fruit = makeRandomFruit(pixels, fruits);
   }
 
   return fruit;
