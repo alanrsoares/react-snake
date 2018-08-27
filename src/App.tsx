@@ -49,6 +49,10 @@ export default class App extends React.Component<{}, IState> {
     return canvas.getContext("2d") as CanvasRenderingContext2D;
   }
 
+  get isPaused() {
+    return !this.state.isPlaying && !this.state.isGameOver;
+  }
+
   constructor(props: {}) {
     super(props);
 
@@ -182,6 +186,12 @@ export default class App extends React.Component<{}, IState> {
 
     if (move) {
       this.setDirection(move);
+    }
+
+    if (code === "Space" && this.state.isPlaying) {
+      if (!this.isPaused) {
+        this.togglePlay();
+      }
     }
   };
 
