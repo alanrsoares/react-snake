@@ -21,6 +21,7 @@ interface IState {
 const LS_KEY = "react-snake-best-score";
 const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
+const PIXEL_RADIUS = 5;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍓", "🥝"];
@@ -202,13 +203,67 @@ export default class App extends React.Component<{}, IState> {
     this.setDirection(direction);
   };
 
-  private drawPixel = (position: game.IPosition) =>
-    this.ctx.fillRect(
-      position.x * PIXEL_SIZE,
-      position.y * PIXEL_SIZE,
-      PIXEL_SIZE,
-      PIXEL_SIZE
-    );
+  private drawPixel = (block: game.Block, i: number, snake: game.Block[]) => {
+    if (i === 0) {
+      utils.roundRect(
+        this.ctx,
+        block.x * PIXEL_SIZE,
+        block.y * PIXEL_SIZE,
+        PIXEL_SIZE,
+        PIXEL_SIZE,
+        5,
+        true,
+        true
+      );
+      return;
+    }
+
+    const nextBlock = snake[i - 1];
+    const isCorner = nextBlock && nextBlock.direction !== block.direction;
+
+    if (isCorner) {
+      const { up, right, left, down } = game.Directions;
+
+      utils.roundRect(
+        this.ctx,
+        block.x * PIXEL_SIZE,
+        block.y * PIXEL_SIZE,
+        PIXEL_SIZE,
+        PIXEL_SIZE,
+        {
+          tl:
+            (nextBlock.direction === right && block.direction === up) ||
+            (nextBlock.direction === down && block.direction === left)
+              ? PIXEL_RADIUS
+              : 0,
+          tr:
+            (nextBlock.direction === down && block.direction === right) ||
+            (nextBlock.direction === left && block.direction === up)
+              ? PIXEL_RADIUS
+              : 0,
+          br:
+            (nextBlock.direction === left && block.direction === down) ||
+            (nextBlock.direction === up && block.direction === right)
+              ? PIXEL_RADIUS
+              : 0,
+          bl:
+            (nextBlock.direction === up && block.direction === left) ||
+            (nextBlock.direction === right && block.direction === down)
+              ? PIXEL_RADIUS
+              : 0
+        },
+        true,
+        false
+      );
+    } else {
+      this.ctx.fillRect(
+        block.x * PIXEL_SIZE,
+        block.y * PIXEL_SIZE,
+        PIXEL_SIZE,
+        PIXEL_SIZE
+      );
+    }
+  };
 
   private draw = () => {
     this.clear();
@@ -217,7 +272,7 @@ export default class App extends React.Component<{}, IState> {
       const isHead = !i;
 
       this.ctx.fillStyle = isHead ? "#011627" : i % 2 ? "#E71D36" : "#FF9F1C";
-      this.drawPixel(block);
+      this.drawPixel(block, i, this.state.snake);
     });
 
     this.ctx.font = `${PIXEL_SIZE * 1.8}px Segoe UI Emoji`;
