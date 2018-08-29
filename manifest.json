@@ -3,6 +3,7 @@
   "name": "React Snake 1987",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "white",
   "background_color": "#accac7",
   "icons": [
