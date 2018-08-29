@@ -21,7 +21,7 @@ interface IState {
 const LS_KEY = "react-snake-best-score";
 const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
-const PIXEL_RADIUS = 5;
+const PIXEL_RADIUS = PIXEL_SIZE / 2;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const SPEED = 100;
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍓", "🥝"];
