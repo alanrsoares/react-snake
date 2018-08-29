@@ -23,9 +23,10 @@ const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
 const PIXEL_RADIUS = PIXEL_SIZE / 2;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
-const SPEED = 100;
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍓", "🥝"];
-const FRAME_RATE = (1 / 60) * 1000; // 60fps
+
+const SNAKE_SPEED = 100; // speed in ms
+const OPTIMAL_FRAME_RATE = (1 / 60) * 1000; // 60fps
 
 // initial state
 const SNAKE: game.Block[] = [{ x: 5, y: 0, direction: "right" }];
@@ -57,8 +58,8 @@ export default class App extends React.Component<{}, IState> {
   constructor(props: {}) {
     super(props);
 
-    this.move = utils.throttle(SPEED, this.move);
-    this.draw = utils.throttle(FRAME_RATE, this.draw);
+    this.move = utils.throttle(SNAKE_SPEED, this.move);
+    this.draw = utils.throttle(OPTIMAL_FRAME_RATE, this.draw);
 
     document.addEventListener("keyup", this.handleKeyUp);
   }
