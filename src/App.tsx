@@ -21,7 +21,6 @@ interface IState {
 const LS_KEY = "react-snake-best-score";
 const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
-const PIXEL_RADIUS = PIXEL_SIZE / 2;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍓", "🥝"];
 
@@ -29,7 +28,11 @@ const SNAKE_SPEED = 100; // speed in ms
 const OPTIMAL_FRAME_RATE = (1 / 60) * 1000; // 60fps
 
 // initial state
-const SNAKE: game.Block[] = [{ x: 5, y: 0, direction: "right" }];
+const SNAKE: game.Block[] = [
+  { x: 5, y: 1, direction: "right", isCorner: false, radius: 0 },
+  { x: 4, y: 1, direction: "right", isCorner: false, radius: 0 },
+  { x: 3, y: 1, direction: "right", isCorner: false, radius: 0 }
+];
 
 const INITIAL_STATE: IState = {
   snake: SNAKE,
@@ -184,15 +187,15 @@ export default class App extends React.Component<{}, IState> {
   }
 
   private handleKeyUp = ({ code }: KeyboardEvent) => {
-    const move = game.decodeDirectionKey(code);
-
-    if (move) {
-      this.setDirection(move);
-    }
-
     if (code === "Space" && this.state.isPlaying) {
       if (!this.isPaused) {
         this.togglePlay();
+      }
+    } else {
+      const move = game.decodeDirectionKey(code);
+
+      if (move) {
+        this.setDirection(move);
       }
     }
   };
@@ -212,47 +215,18 @@ export default class App extends React.Component<{}, IState> {
         block.y * PIXEL_SIZE,
         PIXEL_SIZE,
         PIXEL_SIZE,
-        5,
+        3,
         true,
-        true
+        false
       );
-      return;
-    }
-
-    const nextBlock = snake[i - 1];
-    const isCorner = nextBlock && nextBlock.direction !== block.direction;
-
-    if (isCorner) {
-      const { up, right, left, down } = game.Directions;
-
+    } else if (block.isCorner) {
       utils.roundRect(
         this.ctx,
         block.x * PIXEL_SIZE,
         block.y * PIXEL_SIZE,
         PIXEL_SIZE,
         PIXEL_SIZE,
-        {
-          tl:
-            (nextBlock.direction === right && block.direction === up) ||
-            (nextBlock.direction === down && block.direction === left)
-              ? PIXEL_RADIUS
-              : 0,
-          tr:
-            (nextBlock.direction === down && block.direction === right) ||
-            (nextBlock.direction === left && block.direction === up)
-              ? PIXEL_RADIUS
-              : 0,
-          br:
-            (nextBlock.direction === left && block.direction === down) ||
-            (nextBlock.direction === up && block.direction === right)
-              ? PIXEL_RADIUS
-              : 0,
-          bl:
-            (nextBlock.direction === up && block.direction === left) ||
-            (nextBlock.direction === right && block.direction === down)
-              ? PIXEL_RADIUS
-              : 0
-        },
+        block.radius,
         true,
         false
       );

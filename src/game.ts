@@ -23,6 +23,15 @@ export type Direction = keyof typeof Directions;
 
 export type Block = IPosition & {
   direction: Direction;
+  isCorner: boolean;
+  radius:
+    | number
+    | {
+        tl: number;
+        tr: number;
+        bl: number;
+        br: number;
+      };
 };
 
 export type Fruit = IPosition & { value: string };
@@ -42,14 +51,46 @@ export function moveBlock(
   block: Block,
   sizes: { board: number; pixel: number }
 ): Block {
+  const { up, down, right, left } = Directions;
   const patches = {
-    [Directions.up]: { y: safeIndex(block.y - 1, sizes) },
-    [Directions.down]: { y: safeIndex(block.y + 1, sizes) },
-    [Directions.right]: { x: safeIndex(block.x + 1, sizes) },
-    [Directions.left]: { x: safeIndex(block.x - 1, sizes) }
+    [up]: { y: safeIndex(block.y - 1, sizes) },
+    [down]: { y: safeIndex(block.y + 1, sizes) },
+    [right]: { x: safeIndex(block.x + 1, sizes) },
+    [left]: { x: safeIndex(block.x - 1, sizes) }
   };
 
-  return { ...block, ...patches[direction] };
+  if (block.direction !== direction) {
+    block.isCorner = true;
+    block.radius = {
+      tl:
+        (direction === right && block.direction === up) ||
+        (direction === down && block.direction === left)
+          ? sizes.pixel / 2
+          : 0,
+      tr:
+        (direction === down && block.direction === right) ||
+        (direction === left && block.direction === up)
+          ? sizes.pixel / 2
+          : 0,
+      br:
+        (direction === left && block.direction === down) ||
+        (direction === up && block.direction === right)
+          ? sizes.pixel / 2
+          : 0,
+      bl:
+        (direction === up && block.direction === left) ||
+        (direction === right && block.direction === down)
+          ? sizes.pixel / 2
+          : 0
+    };
+  }
+
+  return {
+    ...block,
+    ...patches[direction],
+    isCorner: false,
+    radius: 0
+  };
 }
 
 export const makeRandomFruit = (pixels: number, fruits: string[]) => ({
