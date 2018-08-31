@@ -21,6 +21,7 @@ interface IState {
 const LS_KEY = "react-snake-best-score";
 const BOARD_SIZE = 330;
 const PIXEL_SIZE = 10;
+const PIXEL_RADIUS = PIXEL_SIZE / 2;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍓", "🥝"];
 
@@ -208,19 +209,32 @@ export default class App extends React.Component<{}, IState> {
   };
 
   private drawPixel = (block: game.Block, i: number, snake: game.Block[]) => {
-    if (i === 0) {
-      utils.roundRect(
+    const { direction } = block;
+    const { up, down, left, right } = game.Directions;
+
+    const isHead = i === 0;
+    const isLast = i === snake.length - 1;
+
+    if (isHead) {
+      return utils.roundRect(
         this.ctx,
         block.x * PIXEL_SIZE,
         block.y * PIXEL_SIZE,
         PIXEL_SIZE,
         PIXEL_SIZE,
-        3,
+        {
+          tl: direction === up || direction === left ? PIXEL_RADIUS : 0,
+          tr: direction === up || direction === right ? PIXEL_RADIUS : 0,
+          bl: direction === down || direction === left ? PIXEL_RADIUS : 0,
+          br: direction === down || direction === right ? PIXEL_RADIUS : 0
+        },
         true,
         false
       );
-    } else if (block.isCorner) {
-      utils.roundRect(
+    }
+
+    if (block.isCorner && typeof block.radius === "object") {
+      return utils.roundRect(
         this.ctx,
         block.x * PIXEL_SIZE,
         block.y * PIXEL_SIZE,
@@ -230,14 +244,32 @@ export default class App extends React.Component<{}, IState> {
         true,
         false
       );
-    } else {
-      this.ctx.fillRect(
+    }
+
+    if (isLast) {
+      return utils.roundRect(
+        this.ctx,
         block.x * PIXEL_SIZE,
         block.y * PIXEL_SIZE,
         PIXEL_SIZE,
-        PIXEL_SIZE
+        PIXEL_SIZE,
+        {
+          tl: direction === down || direction === right ? PIXEL_RADIUS : 0,
+          tr: direction === down || direction === left ? PIXEL_RADIUS : 0,
+          bl: direction === up || direction === right ? PIXEL_RADIUS : 0,
+          br: direction === up || direction === left ? PIXEL_RADIUS : 0
+        },
+        true,
+        false
       );
     }
+
+    this.ctx.fillRect(
+      block.x * PIXEL_SIZE,
+      block.y * PIXEL_SIZE,
+      PIXEL_SIZE,
+      PIXEL_SIZE
+    );
   };
 
   private draw = () => {
