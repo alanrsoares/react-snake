@@ -43,7 +43,7 @@ export function safeIndex(x: number, sizes: { board: number; pixel: number }) {
   if (x < 0) {
     return sizes.board / sizes.pixel - 1;
   }
-  return x * 10 >= sizes.board ? 0 : x;
+  return x * sizes.pixel >= sizes.board ? 0 : x;
 }
 
 export function moveBlock(

@@ -20,7 +20,7 @@ interface IState {
 // config
 const LS_KEY = "react-snake-best-score";
 const BOARD_SIZE = 330;
-const PIXEL_SIZE = 10;
+const PIXEL_SIZE = BOARD_SIZE / 30;
 const PIXEL_RADIUS = PIXEL_SIZE / 2;
 const PIXELS = Math.floor(BOARD_SIZE / PIXEL_SIZE) - 2;
 const FRUITS = ["🍑", "🍎", "🍏", "🍐", "🍓", "🥝"];
@@ -282,7 +282,7 @@ export default class App extends React.Component<{}, IState> {
       this.drawPixel(block, i, this.state.snake);
     });
 
-    this.ctx.font = `${PIXEL_SIZE * 1.8}px Segoe UI Emoji`;
+    this.ctx.font = `${PIXEL_SIZE * 1.4}px Segoe UI Emoji`;
     this.ctx.fillText(
       this.state.fruit.value,
       this.state.fruit.x * PIXEL_SIZE - 6,
