@@ -19,7 +19,7 @@ body {
   animation: octocat-wave 560ms ease-in-out;
 }
 
-@media screen and (max-width: 360px) {
+@media screen and (max-width: 411px) {
   .github-corner {
     visibility: hidden;
   }
