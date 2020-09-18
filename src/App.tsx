@@ -14,7 +14,6 @@ interface IState {
   isGameOver: boolean;
   score: number;
   bestScore: number;
-  animationFrameId: number;
 }
 
 // config
@@ -32,7 +31,7 @@ const OPTIMAL_FRAME_RATE = (1 / 60) * 1000; // 60fps
 const SNAKE: game.Block[] = [
   { x: 5, y: 1, direction: "right", isCorner: false, radius: 0 },
   { x: 4, y: 1, direction: "right", isCorner: false, radius: 0 },
-  { x: 3, y: 1, direction: "right", isCorner: false, radius: 0 }
+  { x: 3, y: 1, direction: "right", isCorner: false, radius: 0 },
 ];
 
 const INITIAL_STATE: IState = {
@@ -43,8 +42,9 @@ const INITIAL_STATE: IState = {
   isGameOver: false,
   score: 0,
   bestScore: JSON.parse(localStorage.getItem(LS_KEY) || "0"),
-  animationFrameId: 0
 };
+
+let animationFrameId = 0;
 
 export default class App extends React.Component<{}, IState> {
   public state: IState = INITIAL_STATE;
@@ -68,7 +68,7 @@ export default class App extends React.Component<{}, IState> {
     document.addEventListener("keyup", this.handleKeyUp);
   }
 
-  public componentWillUnMount() {
+  public componentWillUnmount() {
     document.removeEventListener("keyup", this.handleKeyUp);
     this.stop();
   }
@@ -121,7 +121,7 @@ export default class App extends React.Component<{}, IState> {
               </button>
             ) : (
               <button className="overlay-button" onClick={this.start}>
-                {this.state.animationFrameId ? "RESUME" : "START"}
+                {animationFrameId ? "RESUME" : "START"}
               </button>
             )}
           </div>
@@ -139,7 +139,7 @@ export default class App extends React.Component<{}, IState> {
         <div>
           <div
             className={cn("score", {
-              "score--best": hasBeatenBestScore
+              "score--best": hasBeatenBestScore,
             })}
             style={{ background: this.state.isPlaying ? "#2EC4B6" : "#accac7" }}
           >
@@ -147,7 +147,7 @@ export default class App extends React.Component<{}, IState> {
           </div>
           <div
             className={cn("best-score", {
-              "best-score--beaten": hasBeatenBestScore
+              "best-score--beaten": hasBeatenBestScore,
             })}
           >
             <span className="best-score-label">best: </span>
@@ -155,7 +155,7 @@ export default class App extends React.Component<{}, IState> {
           </div>
         </div>
         <div className="directional-container">
-          {directions.map(direction => (
+          {directions.map((direction) => (
             <button
               key={direction}
               className={`control ${direction}`}
@@ -182,7 +182,7 @@ export default class App extends React.Component<{}, IState> {
     }
 
     this.setState(
-      state => ({ moves: state.moves.concat(direction) }),
+      (state) => ({ moves: state.moves.concat(direction) }),
       this.move
     );
   }
@@ -226,7 +226,7 @@ export default class App extends React.Component<{}, IState> {
           tl: direction === up || direction === left ? PIXEL_RADIUS : 0,
           tr: direction === up || direction === right ? PIXEL_RADIUS : 0,
           bl: direction === down || direction === left ? PIXEL_RADIUS : 0,
-          br: direction === down || direction === right ? PIXEL_RADIUS : 0
+          br: direction === down || direction === right ? PIXEL_RADIUS : 0,
         },
         true,
         false
@@ -257,7 +257,7 @@ export default class App extends React.Component<{}, IState> {
           tl: direction === down || direction === right ? PIXEL_RADIUS : 0,
           tr: direction === down || direction === left ? PIXEL_RADIUS : 0,
           bl: direction === up || direction === right ? PIXEL_RADIUS : 0,
-          br: direction === up || direction === left ? PIXEL_RADIUS : 0
+          br: direction === up || direction === left ? PIXEL_RADIUS : 0,
         },
         true,
         false
@@ -296,16 +296,16 @@ export default class App extends React.Component<{}, IState> {
       this.draw();
     }
 
-    this.state.animationFrameId = window.requestAnimationFrame(this.play);
+    animationFrameId = window.requestAnimationFrame(this.play);
   };
 
   private togglePlay = () => {
-    if (this.state.isGameOver || !this.state.animationFrameId) {
+    if (this.state.isGameOver || !animationFrameId) {
       return;
     }
 
     this.setState({
-      isPlaying: !this.state.isPlaying
+      isPlaying: !this.state.isPlaying,
     });
   };
 
@@ -315,20 +315,20 @@ export default class App extends React.Component<{}, IState> {
     this.setState(
       {
         ...INITIAL_STATE,
-        bestScore: JSON.parse(localStorage.getItem(LS_KEY) || "0")
+        bestScore: JSON.parse(localStorage.getItem(LS_KEY) || "0"),
       },
       this.draw
     );
   };
 
   private stop = () => {
-    window.cancelAnimationFrame(this.state.animationFrameId);
+    window.cancelAnimationFrame(animationFrameId);
 
-    this.state.animationFrameId = 0;
+    animationFrameId = 0;
   };
 
   private start = () => {
-    if (this.state.animationFrameId) {
+    if (animationFrameId) {
       this.stop();
     }
 
@@ -336,7 +336,7 @@ export default class App extends React.Component<{}, IState> {
   };
 
   private move = () => {
-    this.setState(state => {
+    this.setState((state) => {
       // move snake
 
       const move = state.moves.shift();
@@ -346,9 +346,9 @@ export default class App extends React.Component<{}, IState> {
       snake.unshift({
         ...game.moveBlock(direction, utils.head(state.snake), {
           board: BOARD_SIZE,
-          pixel: PIXEL_SIZE
+          pixel: PIXEL_SIZE,
         }),
-        direction
+        direction,
       });
       snake.pop();
 
@@ -369,7 +369,7 @@ export default class App extends React.Component<{}, IState> {
         snake.push(
           game.moveBlock(game.OppositeDirections[last.direction], last, {
             board: BOARD_SIZE,
-            pixel: PIXEL_SIZE
+            pixel: PIXEL_SIZE,
           })
         );
 
@@ -388,7 +388,7 @@ export default class App extends React.Component<{}, IState> {
           move,
           score,
           bestScore,
-          fruit: game.randomFruit(snake, PIXELS, FRUITS)
+          fruit: game.randomFruit(snake, PIXELS, FRUITS),
         };
       }
 
