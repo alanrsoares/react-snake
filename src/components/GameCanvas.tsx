@@ -124,7 +124,7 @@ export function GameCanvas({ snake, fruit, onTogglePlay }: GameCanvasProps) {
         width={BOARD_SIZE}
         height={BOARD_SIZE}
         className="cursor-pointer"
-        style={{ backgroundColor: "#D9E447" }}
+        style={{ backgroundColor: "var(--snake-body-accent)" }}
       />
     </div>
   );

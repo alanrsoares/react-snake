@@ -1,18 +1,15 @@
+import type { FC } from "react";
 import { GameContainer } from "./components/GameContainer";
 import { useGameLogic } from "./hooks/useGameLogic";
 
-function App() {
-  const {
-    gameState,
-    animationFrameId,
-    setDirection,
-    start,
-    reset,
-    togglePlay,
-  } = useGameLogic();
+const App: FC = () => {
+  const [{ gameState, animationFrameId }, actions] = useGameLogic();
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-4" style={{ backgroundColor: 'var(--gameboy-background)' }}>
+    <div
+      className="flex justify-center items-center min-h-screen p-4"
+      style={{ backgroundColor: "#ececec" }}
+    >
       <GameContainer
         snake={gameState.snake}
         fruit={gameState.fruit}
@@ -21,13 +18,13 @@ function App() {
         isPlaying={gameState.isPlaying}
         isGameOver={gameState.isGameOver}
         animationFrameId={animationFrameId}
-        onTogglePlay={togglePlay}
-        onStart={start}
-        onReset={reset}
-        onDirectionChange={setDirection}
+        onTogglePlay={actions.togglePlay}
+        onStart={actions.start}
+        onReset={actions.reset}
+        onDirectionChange={actions.setDirection}
       />
     </div>
   );
-}
+};
 
 export default App;

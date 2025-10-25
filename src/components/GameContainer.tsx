@@ -35,15 +35,26 @@ export function GameContainer({
 }: GameContainerProps) {
   return (
     <div
-      className="border-4 h-[620px] w-[380px] rounded-br-[15%_10%] rounded-bl-[7.5%_5%] shadow-lg"
-      style={{ borderColor: "var(--gameboy-border)" }}
+      className="border-4 h-[620px] w-[380px] rounded-br-[15%_10%] rounded-bl-[7.5%_5%]"
+      style={{
+        borderColor: "var(--gameboy-border)",
+        backgroundColor: "var(--gameboy-background)",
+        boxShadow: `
+          12px 12px 0px 0px #2c2c2c,
+          inset 2px 2px 4px rgba(255,255,255,0.1),
+          inset -2px -2px 4px rgba(0,0,0,0.2)
+        `,
+        transform: "translate(-6px, -6px)",
+        transition: "all 0.1s ease-out",
+      }}
     >
       <div
-        className="relative m-5"
+        className="relative m-5 border inset-ring-2"
         style={{
           width: BOARD_SIZE,
           height: BOARD_SIZE,
-          boxShadow: "0 0 0 4px var(--gameboy-border)",
+          borderColor: "var(--gameboy-border)",
+          borderStyle: "inset",
         }}
       >
         <GameOverlay
@@ -60,7 +71,7 @@ export function GameContainer({
           className="text-center text-white py-0.5 text-sm"
           style={{ backgroundColor: "var(--gameboy-border)" }}
         >
-          REACT SNAKE 1987
+          REACT SNAKE
         </div>
 
         <div className="flex justify-between items-center m-3 p-0.5">

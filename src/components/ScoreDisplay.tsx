@@ -4,23 +4,17 @@ interface ScoreDisplayProps {
   isPlaying: boolean;
 }
 
-export function ScoreDisplay({
-  score,
-  bestScore,
-  isPlaying,
-}: ScoreDisplayProps) {
+export function ScoreDisplay({ score, bestScore }: ScoreDisplayProps) {
   const hasBeatenBestScore = score >= bestScore;
 
   return (
     <div className="flex flex-col items-center space-y-2">
       {/* Main Score Display */}
       <div
-        className="relative px-4 py-3 rounded-lg border-2 shadow-lg"
+        className="relative m-5 border w-full h-full py-4"
         style={{
-          backgroundColor: isPlaying ? "#85bb04" : "#a2b043",
-          borderColor: "#7b973a",
-          boxShadow:
-            "0 4px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3)",
+          borderColor: "var(--gameboy-screen)",
+          borderStyle: "inset",
         }}
       >
         <div className="text-center">

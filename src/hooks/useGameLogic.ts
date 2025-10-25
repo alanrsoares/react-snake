@@ -175,12 +175,16 @@ export function useGameLogic() {
     };
   }, [gameState.isPlaying, play]);
 
-  return {
-    gameState,
-    animationFrameId: animationFrameRef.current,
-    setDirection,
-    start,
-    reset,
-    togglePlay,
-  };
+  return [
+    {
+      gameState,
+      animationFrameId: animationFrameRef.current,
+    },
+    {
+      setDirection,
+      start,
+      reset,
+      togglePlay,
+    },
+  ] as const;
 }

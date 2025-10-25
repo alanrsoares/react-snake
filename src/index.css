@@ -18,10 +18,10 @@
   --snake-eye: #615349; /* Dark brown eye */
 
   /* Game Boy inspired colors */
-  --gameboy-screen: #2ec4b6; /* Aqua screen */
-  --gameboy-border: #aaa; /* Gray border */
-  --gameboy-background: #fdfffc; /* Off-white background */
-  --gameboy-text: #011627; /* Dark text */
+  --gameboy-screen: var(--snake-body-accent); /* Aqua screen */
+  --gameboy-border: var(--snake-body-dark); /* Gray border */
+  --gameboy-background: var(--snake-body-medium); /* Off-white background */
+  --gameboy-text: var(--snake-body-dark); /* Dark text */
   --gameboy-score-normal: #accac7; /* Light gray score */
   --gameboy-score-active: #2ec4b6; /* Aqua when playing */
   --gameboy-score-best: tomato; /* Red when beating best */
