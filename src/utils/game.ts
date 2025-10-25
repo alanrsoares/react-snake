@@ -1,42 +1,6 @@
-import * as utils from "./utils";
+import type { Block, Direction, Fruit, Position } from '../types/game';
 
-export interface IPosition {
-  x: number;
-  y: number;
-}
-
-export enum Directions {
-  up = "up",
-  right = "right",
-  left = "left",
-  down = "down"
-}
-
-export const OppositeDirections = {
-  up: Directions.down,
-  right: Directions.left,
-  left: Directions.right,
-  down: Directions.up
-};
-
-export type Direction = keyof typeof Directions;
-
-export type Block = IPosition & {
-  direction: Direction;
-  isCorner: boolean;
-  radius:
-    | number
-    | {
-        tl: number;
-        tr: number;
-        bl: number;
-        br: number;
-      };
-};
-
-export type Fruit = IPosition & { value: string };
-
-export const hasCollidedWith = (a: IPosition) => (b: IPosition) =>
+export const hasCollidedWith = (a: Position) => (b: Position) =>
   a.x === b.x && a.y === b.y;
 
 export function safeIndex(x: number, sizes: { board: number; pixel: number }) {
@@ -51,7 +15,13 @@ export function moveBlock(
   block: Block,
   sizes: { board: number; pixel: number }
 ): Block {
-  const { up, down, right, left } = Directions;
+  const { up, down, right, left } = {
+    up: 'up' as const,
+    down: 'down' as const,
+    right: 'right' as const,
+    left: 'left' as const,
+  };
+  
   const patches = {
     [up]: { y: safeIndex(block.y - 1, sizes) },
     [down]: { y: safeIndex(block.y + 1, sizes) },
@@ -94,9 +64,9 @@ export function moveBlock(
 }
 
 export const makeRandomFruit = (pixels: number, fruits: string[]) => ({
-  value: fruits[utils.randomInt(0, fruits.length - 1)],
-  y: utils.randomInt(1, pixels),
-  x: utils.randomInt(1, pixels)
+  value: fruits[Math.floor(Math.random() * fruits.length)],
+  y: Math.floor(Math.random() * pixels) + 1,
+  x: Math.floor(Math.random() * pixels) + 1
 });
 
 export const randomFruit = (
@@ -113,20 +83,20 @@ export const randomFruit = (
   return fruit;
 };
 
-export function decodeDirectionKey(keyCode: string) {
+export function decodeDirectionKey(keyCode: string): Direction | null {
   switch (keyCode) {
-    case "KeyW":
-    case "ArrowUp":
-      return Directions.up;
-    case "KeyS":
-    case "ArrowDown":
-      return Directions.down;
-    case "KeyA":
-    case "ArrowLeft":
-      return Directions.left;
-    case "KeyD":
-    case "ArrowRight":
-      return Directions.right;
+    case 'KeyW':
+    case 'ArrowUp':
+      return 'up';
+    case 'KeyS':
+    case 'ArrowDown':
+      return 'down';
+    case 'KeyA':
+    case 'ArrowLeft':
+      return 'left';
+    case 'KeyD':
+    case 'ArrowRight':
+      return 'right';
     default:
       return null;
   }

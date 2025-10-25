@@ -1,49 +1,38 @@
+@import "tailwindcss";
+
 @font-face {
-  font-family: EarlyGameBoy;
-  src: url(./Early-GameBoy.ttf);
+  font-family: "EarlyGameBoy";
+  src: url("./assets/Early-GameBoy.ttf");
+}
+
+:root {
+  /* Snake brand colors derived from snake.svg */
+  --snake-head: #ff5023; /* Orange-red snake head */
+  --snake-body-dark: #7b973a; /* Dark green body */
+  --snake-body-shadow: #677f32; /* Darker green shadow */
+  --snake-body-medium: #a2b043; /* Medium green */
+  --snake-body-bright: #85bb04; /* Bright green */
+  --snake-body-light: #9dca40; /* Light green */
+  --snake-body-highlight: #c2cb4c; /* Yellow-green details */
+  --snake-body-accent: #d9e447; /* Light yellow-green highlights */
+  --snake-eye: #615349; /* Dark brown eye */
+
+  /* Game Boy inspired colors */
+  --gameboy-screen: #2ec4b6; /* Aqua screen */
+  --gameboy-border: #aaa; /* Gray border */
+  --gameboy-background: #fdfffc; /* Off-white background */
+  --gameboy-text: #011627; /* Dark text */
+  --gameboy-score-normal: #accac7; /* Light gray score */
+  --gameboy-score-active: #2ec4b6; /* Aqua when playing */
+  --gameboy-score-best: tomato; /* Red when beating best */
 }
 
 * {
-  font-family: EarlyGameBoy;
+  font-family: "EarlyGameBoy", monospace;
 }
 
 body {
-  background: #fdfffc;
+  background: var(--gameboy-background);
   max-height: 100vh;
   overscroll-behavior: none;
-}
-
-/* octocat */
-
-.github-corner:hover .octo-arm {
-  animation: octocat-wave 560ms ease-in-out;
-}
-
-@media screen and (max-width: 411px) {
-  .github-corner {
-    visibility: hidden;
-  }
-}
-
-@keyframes octocat-wave {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  20%,
-  60% {
-    transform: rotate(-25deg);
-  }
-  40%,
-  80% {
-    transform: rotate(10deg);
-  }
-}
-@media (max-width: 500px) {
-  .github-corner:hover .octo-arm {
-    animation: none;
-  }
-  .github-corner .octo-arm {
-    animation: octocat-wave 560ms ease-in-out;
-  }
 }
