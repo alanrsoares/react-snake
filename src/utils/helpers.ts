@@ -41,7 +41,12 @@ export function roundRect(
     const defaultRadius = { tl: 0, tr: 0, br: 0, bl: 0 };
 
     radius = Object.keys(defaultRadius).reduce(
-      (acc, side) => ({ ...acc, [side]: acc[side] || defaultRadius[side] }),
+      (acc, side) => ({
+        ...acc,
+        [side]:
+          acc[side as keyof typeof acc] ||
+          defaultRadius[side as keyof typeof defaultRadius],
+      }),
       radius
     );
   }
