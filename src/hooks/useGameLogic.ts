@@ -31,6 +31,7 @@ const INITIAL_STATE: GameState = {
 
 export function useGameLogic() {
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
+  const [activePressedKey, setActivePressedKey] = useState<Direction | null>(null);
   const animationFrameRef = useRef<number>(0);
 
   const move = useCallback(() => {
@@ -111,15 +112,27 @@ export function useGameLogic() {
     });
   }, []);
 
+  const handleKeyDown = useCallback(
+    ({ code }: KeyboardEvent) => {
+      const move = gameUtils.decodeDirectionKey(code);
+      if (move) {
+        setActivePressedKey(move);
+      }
+    },
+    []
+  );
+
   const handleKeyUp = useCallback(
     ({ code }: KeyboardEvent) => {
+      const move = gameUtils.decodeDirectionKey(code);
+      if (move) {
+        setActivePressedKey(null);
+      }
+
       if (code === "Space" && gameState.isPlaying) {
         setGameState((prev) => ({ ...prev, isPlaying: !prev.isPlaying }));
-      } else {
-        const move = gameUtils.decodeDirectionKey(code);
-        if (move) {
-          setDirection(move);
-        }
+      } else if (move) {
+        setDirection(move);
       }
     },
     [gameState.isPlaying, setDirection]
@@ -160,9 +173,13 @@ export function useGameLogic() {
   }, [move]);
 
   useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
-    return () => document.removeEventListener("keyup", handleKeyUp);
-  }, [handleKeyUp]);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [handleKeyDown, handleKeyUp]);
 
   useEffect(() => {
     if (gameState.isPlaying) {
@@ -179,6 +196,7 @@ export function useGameLogic() {
     {
       gameState,
       animationFrameId: animationFrameRef.current,
+      activePressedKey,
     },
     {
       setDirection,

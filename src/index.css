@@ -25,6 +25,11 @@
   --gameboy-score-normal: #accac7; /* Light gray score */
   --gameboy-score-active: #2ec4b6; /* Aqua when playing */
   --gameboy-score-best: tomato; /* Red when beating best */
+  --gameboy-button-base: var(--snake-eye); /* Button base color */
+  --gameboy-button-hover: var(--snake-body-shadow); /* Button hover color */
+  --gameboy-button-active: var(
+    --snake-body-accent
+  ); /* Button active highlight */
 }
 
 * {
@@ -35,4 +40,148 @@ body {
   background: var(--gameboy-background);
   max-height: 100vh;
   overscroll-behavior: none;
+}
+
+@layer components {
+  .directional-buttons {
+    width: 140px;
+    height: 140px;
+    display: grid;
+    grid-gap: 0.25rem;
+    grid-template-columns: 45fr 60fr 45fr;
+    grid-template-rows: 45fr 60fr 45fr;
+    grid-template-areas:
+      "....  up  ....."
+      "left  ..  right"
+      ".... down .....";
+  }
+
+  .visually-hidden {
+    position: absolute !important;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+  }
+
+  .direction-button {
+    color: var(--gameboy-button-base);
+    background: currentcolor;
+    border: none;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, color 0.2s ease-out;
+  }
+
+  .direction-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .direction-button:before {
+    display: block;
+    content: "";
+    position: absolute;
+    width: 2.3125rem;
+    height: 2.3125rem;
+    transform: rotate(45deg);
+    background: currentcolor;
+    transition: background-color 0.2s ease-out;
+  }
+
+  .direction-button:after {
+    display: block;
+    content: "";
+    position: absolute;
+    border: 1.09375rem solid transparent;
+    color: var(--gameboy-background);
+    opacity: 0.6;
+    transition: color 0.2s ease-out, opacity 0.2s ease-out,
+      border-bottom-color 0.2s ease-out, border-top-color 0.2s ease-out,
+      border-left-color 0.2s ease-out, border-right-color 0.2s ease-out;
+  }
+
+  .direction-button:hover:not(:disabled) {
+    color: var(--gameboy-button-hover);
+  }
+
+  .direction-button:active:not(:disabled) {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .direction-button:active:not(:disabled):after {
+    color: var(--gameboy-button-active);
+    opacity: 0.8;
+  }
+
+  .direction-button.key-pressed:not(:disabled) {
+    color: var(--gameboy-button-hover);
+  }
+
+  .direction-button.up {
+    grid-area: up;
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+
+  .direction-button.up:before {
+    left: calc(50% - 1.15625rem);
+    bottom: -1.15625rem;
+  }
+
+  .direction-button.up:after {
+    border-bottom-color: currentcolor;
+    left: calc(50% - 1.09375rem);
+    top: -0.546875rem;
+  }
+
+  .direction-button.left {
+    grid-area: left;
+    border-radius: 0.5rem 0 0 0.5rem;
+  }
+
+  .direction-button.left:before {
+    right: -1.15625rem;
+    top: calc(50% - 1.15625rem);
+  }
+
+  .direction-button.left:after {
+    border-right-color: currentcolor;
+    top: calc(50% - 1.09375rem);
+    left: -0.546875rem;
+  }
+
+  .direction-button.right {
+    grid-area: right;
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+
+  .direction-button.right:before {
+    left: -1.15625rem;
+    top: calc(50% - 1.15625rem);
+  }
+
+  .direction-button.right:after {
+    border-left-color: currentcolor;
+    top: calc(50% - 1.09375rem);
+    right: -0.546875rem;
+  }
+
+  .direction-button.down {
+    grid-area: down;
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+
+  .direction-button.down:before {
+    left: calc(50% - 1.15625rem);
+    top: -1.15625rem;
+  }
+
+  .direction-button.down:after {
+    border-top-color: currentcolor;
+    left: calc(50% - 1.09375rem);
+    bottom: -0.546875rem;
+  }
 }

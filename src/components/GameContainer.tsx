@@ -12,6 +12,7 @@ interface GameContainerProps {
   isPlaying: boolean;
   isGameOver: boolean;
   animationFrameId: number;
+  activePressedKey: Direction | null;
   onTogglePlay: () => void;
   onStart: () => void;
   onReset: () => void;
@@ -28,6 +29,7 @@ export function GameContainer({
   isPlaying,
   isGameOver,
   animationFrameId,
+  activePressedKey,
   onTogglePlay,
   onStart,
   onReset,
@@ -83,6 +85,7 @@ export function GameContainer({
 
           <DirectionalControls
             isPlaying={isPlaying}
+            activePressedKey={activePressedKey}
             onDirectionChange={onDirectionChange}
           />
         </div>

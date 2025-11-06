@@ -3,7 +3,7 @@ import { GameContainer } from "./components/GameContainer";
 import { useGameLogic } from "./hooks/useGameLogic";
 
 const App: FC = () => {
-  const [{ gameState, animationFrameId }, actions] = useGameLogic();
+  const [{ gameState, animationFrameId, activePressedKey }, actions] = useGameLogic();
 
   return (
     <div
@@ -18,6 +18,7 @@ const App: FC = () => {
         isPlaying={gameState.isPlaying}
         isGameOver={gameState.isGameOver}
         animationFrameId={animationFrameId}
+        activePressedKey={activePressedKey}
         onTogglePlay={actions.togglePlay}
         onStart={actions.start}
         onReset={actions.reset}
