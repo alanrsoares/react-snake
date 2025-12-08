@@ -184,4 +184,34 @@ body {
     left: calc(50% - 1.09375rem);
     bottom: -0.546875rem;
   }
+
+  .overlay-slide-down {
+    animation: overlay-slide-down 0.5s ease-out both;
+  }
+
+  .overlay-slide-up {
+    animation: overlay-slide-up 0.5s ease-out both;
+  }
+}
+
+@keyframes overlay-slide-down {
+  from {
+    transform: translateY(-60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-slide-up {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

@@ -31,13 +31,13 @@ export function GameOverlay({
       >
         {!isGameOver && (
           <div
-            className="w-[150px] h-[150px] mb-[-50px] rounded-full flex items-center justify-center animate-fruit-sparkle"
+            className="overlay-slide-down w-[150px] h-[150px] mb-[-50px] rounded-full flex items-center justify-center animate-fruit-sparkle"
             style={{ backgroundColor: "var(--snake-body-medium)" }}
           >
             <img src={snakeSvg} alt="Snake" className="w-20 h-20" />
           </div>
         )}
-        <div className="text-4xl font-bold">
+        <div className="overlay-slide-up text-4xl font-bold">
           {isGameOver ? "GAME OVER" : "REACT SNAKE"}
         </div>
         <div className="mt-5">
